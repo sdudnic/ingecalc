@@ -1,5 +1,5 @@
 .DS_STORE
-
+/.vs/
 /dist/
 /bazel-out
 /integration/bazel/bazel-*
