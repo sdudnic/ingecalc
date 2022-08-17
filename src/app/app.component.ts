@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { debounceTime, Subscription } from 'rxjs';
 import { CalculatorService } from './calculator.service';
+import { Properties } from './properties';
 
 @Component({
   selector: 'my-app',
@@ -13,7 +14,7 @@ export class AppComponent {
   debounceTime = 500;
 
   paramsFormGroup: FormGroup;
-  properties: any = { a: 1, b: 2, c: 0, d: 0, e: 0 };
+  properties: Properties;
 
   constructor(private fb: FormBuilder, private calculator: CalculatorService) {
     this.paramsFormGroup = this.fb.group(this.properties);
