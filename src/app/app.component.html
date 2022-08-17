@@ -1,0 +1,21 @@
+<h2>Ingé Calc</h2>
+<form [formGroup]="paramsFormGroup">
+  a =
+  <input type="number" formControlName="a" size="2" />
+  <br />
+  b =
+  <input type="number" formControlName="b" />
+  <br />
+  c = <label>{{ getControlLabel('c') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
+    => a + 10b</small
+  >
+  <br />
+  d = <label>{{ getControlLabel('d') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
+    => a + 100b</small
+  >
+
+  <br />
+  e = <label>{{ getControlLabel('e') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
+    => a * b</small
+  >
+</form>

@@ -1,0 +1,14 @@
+p {
+  font-family: Lato;
+}
+
+input {
+  width: 3em;
+  color: blue;
+  border-color: lightgray;
+  border-width: 1px;
+  border-style: solid;
+}
+label {
+  color: red;
+}
