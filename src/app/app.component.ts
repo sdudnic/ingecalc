@@ -17,6 +17,7 @@ export class AppComponent {
   properties: Properties;
 
   constructor(private fb: FormBuilder, private calculator: CalculatorService) {
+    this.properties = new Properties();
     this.paramsFormGroup = this.fb.group(this.properties);
   }
 
