@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { C } from './calculator/c';
-import { D } from './calculator/d';
-import { E } from './calculator/e';
+import { C } from './calculator/params/c';
+import { D } from './calculator/params/d';
+import { E } from './calculator/params/e';
 
 @Injectable()
 export class CalculatorService {
