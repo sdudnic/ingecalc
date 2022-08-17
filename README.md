@@ -1,3 +1,3 @@
-# ingecalc-xga5rf
+# ingecalc
 
 [Edit on StackBlitz ⚡️](https://stackblitz.com/edit/ingecalc-xga5rf)
