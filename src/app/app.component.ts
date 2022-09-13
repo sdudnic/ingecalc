@@ -48,9 +48,9 @@ export class AppComponent {
     return 0;
   }
 
-  functionToBeCalled() {    
+  async functionToBeCalled() {    
     let props = this.paramsFormGroup.value;
-    this.properties = this.calculator.calculate(props);
+    this.properties = await this.calculator.calculate(props);
     this.paramsFormGroup.patchValue(this.properties);
   }
 

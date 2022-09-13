@@ -20,12 +20,13 @@ import {
 import { C } from './calculator/params/c';
 import { D } from './calculator/params/d';
 import { E } from './calculator/params/e';
+import AEC from './calculator/params/aec';
 
 @Injectable()
 export class CalculatorService {
   constructor() {}
 
-  calculate(properties: Record<PropertyCode, any>) {
+  async calculate(properties: Record<PropertyCode, any>) {
     const a = properties['a'];
     const b = properties['b'];
     const STA = <EnumSTA>properties[PropertyCode.STA];
@@ -70,17 +71,16 @@ export class CalculatorService {
     const SPBC = <number>properties[PropertyCode.SPBC];
     const ECF = <EnumECF>properties[PropertyCode.ECF];
     const BAUTO = <boolean>properties[PropertyCode.BAUTO];
-
-    const c = C(a, b);
-    const d = D(a, b);
+    const ECEFF = <number>properties[PropertyCode.ECEFF];
 
     console.log('before call');
-    const e = this.call('E', window, a, b);
+    //const e = this.call('E', window, a, b);
     console.log('after call');
 
-    properties['c'] = c;
-    properties['d'] = d;
-    properties['e'] = e;
+    properties['c'] = await C(a, b);
+    properties['d'] = await D(a, b);
+    properties['e'] = await E(a, b);
+    properties[PropertyCode.AEC] = await AEC(ECEFF);
 
     return properties;
   }
