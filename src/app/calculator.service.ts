@@ -1,4 +1,3 @@
-import { HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   EnumCDF,
@@ -75,9 +74,9 @@ export class CalculatorService {
     const c = C(a, b);
     const d = D(a, b);
 
-    console.log('aaaaa');
+    console.log('before call');
     const e = this.call('E', window, a, b);
-    console.log('bbb');
+    console.log('after call');
 
     properties['c'] = c;
     properties['d'] = d;
