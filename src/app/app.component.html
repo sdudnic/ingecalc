@@ -1,21 +1,17 @@
 <h2>Ingé Calc</h2>
 <form [formGroup]="paramsFormGroup">
-  a =
-  <input type="number" formControlName="a" size="2" />
-  <br />
-  b =
-  <input type="number" formControlName="b" />
-  <br />
-  c = <label>{{ getControlLabel('c') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
-    => a + 10b</small
-  >
-  <br />
-  d = <label>{{ getControlLabel('d') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
-    => a + 100b</small
-  >
+  <label>a</label><input type="number" formControlName="a" />
+  <label>b</label><input type="number" formControlName="b" />
 
-  <br />
-  e = <label>{{ getControlLabel('e') }}</label> &nbsp;&nbsp;&nbsp;&nbsp;<small>
-    => a * b</small
-  >
+  <label>e</label><input type="number" formControlName="e" /><small>    => a * b</small>
+  <label>c</label><input type="number" formControlName="c" /><small>    => a + 10b</small>
+  <label>d</label><input type="number" formControlName="d" /><small>    => a + 100b</small>
+  
+
+  <ul>
+    <li *ngFor="let prop of properties | keyvalue">
+      <label>{{ prop.key }}</label>
+      <input type="number" formControlName={{prop.key}} />
+    </li>
+  </ul>
 </form>

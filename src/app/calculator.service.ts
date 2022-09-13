@@ -1,5 +1,23 @@
+import { HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EnumCDF, EnumSTA } from './calculator/common/enums';
+import {
+  EnumCDF,
+  EnumSTA,
+  PropertyCode,
+  EnumAGF,
+  EnumCBAR,
+  EnumCON,
+  EnumUNIT,
+  EnumECF,
+  EnumENT,
+  EnumKCO,
+  EnumLFL,
+  EnumSFS,
+  EnumSREP,
+  EnumSTD,
+  EnumTYC,
+  Enum_D,
+} from './calculator/common/enums';
 import { C } from './calculator/params/c';
 import { D } from './calculator/params/d';
 import { E } from './calculator/params/e';
@@ -8,7 +26,7 @@ import { E } from './calculator/params/e';
 export class CalculatorService {
   constructor() {}
 
-  calculate(properties: Record<string, number>) {
+  calculate(properties: Record<PropertyCode, any>) {
     const a = properties['a'];
     const b = properties['b'];
     const STA = <EnumSTA>properties[PropertyCode.STA];
@@ -56,11 +74,25 @@ export class CalculatorService {
 
     const c = C(a, b);
     const d = D(a, b);
-    const e = E(a, b);
+
+    console.log('aaaaa');
+    const e = this.call('E', window, a, b);
+    console.log('bbb');
 
     properties['c'] = c;
     properties['d'] = d;
     properties['e'] = e;
+
     return properties;
+  }
+
+  call(functionName, context, ...args) {
+    //var args = Array.prototype.slice.call(arguments, 2);
+    var namespaces = functionName.split('.');
+    var func = namespaces.pop();
+    for (var i = 0; i < namespaces.length; i++) {
+      context = context[namespaces[i]];
+    }
+    return context[func].apply(context, args);
   }
 }
