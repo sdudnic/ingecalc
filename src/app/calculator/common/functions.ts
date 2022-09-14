@@ -1,16 +1,28 @@
 import { parseNumber } from '@progress/kendo-angular-intl';
-import { Setting } from 'Client/app/models/setting';
-import { AppService } from 'Client/app/services/app.service';
-import { SettingsService } from 'Client/app/services/settings.service';
-import { EnumENT, EnumSFS, EnumSTA, EnumSTD, EnumTYC, EnumUNIT, ErrorLevel, PropertyCode, SettingProperty } from './enums';
+import { Setting } from '../../models/setting';
+import { AppService } from '../../services/app.service';
+import { SettingsService } from '../../services/settings.service';
+import {
+  EnumENT,
+  EnumSFS,
+  EnumSTA,
+  EnumSTD,
+  EnumTYC,
+  EnumUNIT,
+  ErrorLevel,
+  PropertyCode,
+  SettingProperty,
+} from './enums';
 import { CalculatorError } from './exceptions/calculator-error';
 import { ParamString } from './param-string';
 
-
 /**
  * Returns an API call 'prop/{settingCode}/{propertyCode}'
-*/
-export async function getSettingValue(settingCode: string, property: SettingProperty): Promise<number> {
+ */
+export async function getSettingValue(
+  settingCode: string,
+  property: SettingProperty
+): Promise<number> {
   // const httpClient = new HttpClient(new HttpXhrBackend({
   // build: () => new XMLHttpRequest()
   // }));
@@ -20,11 +32,12 @@ export async function getSettingValue(settingCode: string, property: SettingProp
   const settingsService = AppService.getInjector().get(SettingsService);
   settings = await settingsService.getSettings();
 
-  let value: string = "";
-  var setting = settings.find(x => x.listCode == settingCode && x.propertyCode == propertyCode);
+  let value: string = '';
+  var setting = settings.find(
+    (x) => x.listCode == settingCode && x.propertyCode == propertyCode
+  );
 
-  if (setting)
-    value = setting.propertyValue;
+  if (setting) value = setting.propertyValue;
   // else
   // value = await lastValueFrom(httpClient.get<string>(`/api/settings/prop/${settingCode}/${propertyCode}`));
 
@@ -34,25 +47,37 @@ export async function getSettingValue(settingCode: string, property: SettingProp
 /**
  * Throws a CalculatorError
  * @param message message ready for translation under 'message.<texthere>'
- * @param propertyCode 
+ * @param propertyCode
  * @param params message parameters to be remplaced in the message text
  * @param fallbackValue fallback value for the specified parameter if an error occurs and it can't be calculated
- * @param errorLevel 
+ * @param errorLevel
  */
-export function throwCalculatorError(message: string, propertyCode: string, params?: Object, fallbackValue?: any, errorLevel?: ErrorLevel): void {
-  throw new CalculatorError(message, propertyCode, fallbackValue, errorLevel, params)
+export function throwCalculatorError(
+  message: string,
+  propertyCode: string,
+  params?: Object,
+  fallbackValue?: any,
+  errorLevel?: ErrorLevel
+): void {
+  throw new CalculatorError(
+    message,
+    propertyCode,
+    fallbackValue,
+    errorLevel,
+    params
+  );
 }
 
 /**
  * verification de l'angle de la bielle (strut, theta)
  * @param theta strut angle / bielle
- * @param STA 
- * @param KUNIT 
- * @param ned 
- * @param BFL 
- * @param HFL 
- * @param FCTM 
- * @returns 
+ * @param STA
+ * @param KUNIT
+ * @param ned
+ * @param BFL
+ * @param HFL
+ * @param FCTM
+ * @returns
  */
 export function checkStrut(
   theta: number,
@@ -62,11 +87,11 @@ export function checkStrut(
   ned: number,
   BFL: number,
   HFL: number,
-  FCTM: number,
+  FCTM: number
 ) {
-
-  let params = { min: 21.8, max: 45 }
-  const messageTemplate = "The angle of inclination of the strut must be between {{min}}° and {{max}}°"
+  let params = { min: 21.8, max: 45 };
+  const messageTemplate =
+    'The angle of inclination of the strut must be between {{min}}° and {{max}}°';
 
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
@@ -74,7 +99,7 @@ export function checkStrut(
     case EnumSTA.EN_1992_3_BS:
     case EnumSTA.BS_EN_1992_1_1_NA:
     case EnumSTA.BS_EN_1992_3_NA:
-      params = { min: 21.8, max: 45 }
+      params = { min: 21.8, max: 45 };
       break;
 
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -82,19 +107,35 @@ export function checkStrut(
     case EnumSTA.NF_EN_1992_3_NA:
       {
         const ac: number = BFL * HFL;
-        if (ned * 0.000001 * KUNIT / ac < 0 && ned * 0.000001 * KUNIT / ac <= -FCTM) {
-          throwCalculatorError("Sigct > FCTM : Erreur, ce cas n'est pas traité dans la NF EN 1992-1-1/NA", "FCTM", undefined, NaN);
+        if (
+          (ned * 0.000001 * KUNIT) / ac < 0 &&
+          (ned * 0.000001 * KUNIT) / ac <= -FCTM
+        ) {
+          throwCalculatorError(
+            "Sigct > FCTM : Erreur, ce cas n'est pas traité dans la NF EN 1992-1-1/NA",
+            'FCTM',
+            undefined,
+            NaN
+          );
         }
-        if ((ned * 0.000001 * KUNIT / ac) < 0) {
+        if ((ned * 0.000001 * KUNIT) / ac < 0) {
           params = {
-            min: getDegrees(Math.atan(1 / (2.5 * Math.sqrt(1 + ned * 0.000001 * KUNIT / ac / FCTM)))),
-            max: getDegrees(Math.atan(1 / (1 * Math.sqrt(1 + ned * 0.000001 * KUNIT / ac / FCTM))))
-          }
+            min: getDegrees(
+              Math.atan(
+                1 / (2.5 * Math.sqrt(1 + (ned * 0.000001 * KUNIT) / ac / FCTM))
+              )
+            ),
+            max: getDegrees(
+              Math.atan(
+                1 / (1 * Math.sqrt(1 + (ned * 0.000001 * KUNIT) / ac / FCTM))
+              )
+            ),
+          };
         } else {
           params = {
             min: getDegrees(Math.atan(1 / 2.5)),
-            max: getDegrees(Math.atan(1 / 1))
-          }
+            max: getDegrees(Math.atan(1 / 1)),
+          };
         }
       }
       break;
@@ -106,8 +147,8 @@ export function checkStrut(
 
   if (theta < params.min || theta > params.max) {
     // round the numbers to max 2 precision digits
-    params.max = Math.round(params.max * 100) / 100
-    params.min = Math.round(params.min * 100) / 100
+    params.max = Math.round(params.max * 100) / 100;
+    params.min = Math.round(params.min * 100) / 100;
 
     throwCalculatorError(messageTemplate, thetaCode, params, theta);
   }
@@ -123,17 +164,16 @@ export async function getTeta(
   FCTM: number,
   ACC: number,
   FCK: number,
-  GACF: number,
+  GACF: number
 ): Promise<number> {
-
   checkStrut(str, PropertyCode.STR_SF, STA, KUNIT, NEDSF, BFL, HFL, FCTM);
 
   if (STA === EnumSTA.RCC_CW_2018) {
     let fcd = getFcd(ACC, FCK, GACF);
     let sigmacp = getSigmaCp(NEDSF, HFL, BFL, KUNIT, fcd);
 
-    let coef = (sigmacp < 0) ? 0.9 : 0.2;
-    let angle = Math.atan(1 / Math.max(1, 1.2 + coef * sigmacp / FCTM));
+    let coef = sigmacp < 0 ? 0.9 : 0.2;
+    let angle = Math.atan(1 / Math.max(1, 1.2 + (coef * sigmacp) / FCTM));
     str = getDegrees(angle);
   }
 
@@ -148,8 +188,11 @@ export async function getTeta(
  */
 export function getkh(H0C: number): number {
   //=IF(F31<500;-2.2635*(F31/1000)^3+4.4623*(F31/1000)^2-2.7307*(F31/1000)+1.232;0.7)
-  return (H0C < 500) ?
-    -2.2635 * (H0C / 1000) ** 3 + 4.4623 * (H0C / 1000) ** 2 - 2.7307 * (H0C / 1000) + 1.232
+  return H0C < 500
+    ? -2.2635 * (H0C / 1000) ** 3 +
+        4.4623 * (H0C / 1000) ** 2 -
+        2.7307 * (H0C / 1000) +
+        1.232
     : 0.7;
 }
 
@@ -165,9 +208,8 @@ export function getBasicBCTT0(
   t0: number,
   FCM: number,
   rh: number,
-  h0: number,
+  h0: number
 ): number {
-
   //=((F20-F22)/(S51+F20-F22))^0.3
 
   switch (STA) {
@@ -176,11 +218,10 @@ export function getBasicBCTT0(
     case EnumSTA.BS_EN_1992_1_1_NA:
     case EnumSTA.EN_1992_3_BS:
     case EnumSTA.NF_EN_1992_3_NA:
-    case EnumSTA.BS_EN_1992_3_NA:
-      {
-        let bH = getbH(STA, FCM, rh, h0);
-        return ((t - t0) / (bH + t - t0)) ** 0.3;
-      }
+    case EnumSTA.BS_EN_1992_3_NA: {
+      let bH = getbH(STA, FCM, rh, h0);
+      return ((t - t0) / (bH + t - t0)) ** 0.3;
+    }
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
     case EnumSTA.RCC_CW_2018:
@@ -189,17 +230,12 @@ export function getBasicBCTT0(
 }
 
 /**
-* Cara béton
-* Fluage
-* beta_H
-* R51..
-*/
-function getbH(
-  STA: EnumSTA,
-  FCM: number,
-  rh: number,
-  h0: number,
-): number {
+ * Cara béton
+ * Fluage
+ * beta_H
+ * R51..
+ */
+function getbH(STA: EnumSTA, FCM: number, rh: number, h0: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -226,9 +262,9 @@ function getbH(
 
       let a3 = geta3(STA, FCM);
 
-      return (FCM <= 35) ?
-        Math.min(1.5 * (1 + (0.012 * rh) ** 18) * h0 + 250, 1500)
-        : Math.min(1.5 * (1 + (0.012 * rh) ** 18) * h0 + 250 * a3, 1500 * a3)
+      return FCM <= 35
+        ? Math.min(1.5 * (1 + (0.012 * rh) ** 18) * h0 + 250, 1500)
+        : Math.min(1.5 * (1 + (0.012 * rh) ** 18) * h0 + 250 * a3, 1500 * a3);
     }
 
     case EnumSTA.EN1992_2_BS:
@@ -245,11 +281,7 @@ function getbH(
  * alpha_1
  * R52..
  */
-export function geta1(
-  STA: EnumSTA,
-  FCM: number,
-): number {
-
+export function geta1(STA: EnumSTA, FCM: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -274,11 +306,7 @@ export function geta1(
  * alpha_2
  * R53..
  */
-export function geta2(
-  STA: EnumSTA,
-  FCM: number,
-): number {
-
+export function geta2(STA: EnumSTA, FCM: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -303,11 +331,7 @@ export function geta2(
  * alpha_3
  * R54..
  */
-function geta3(
-  STA: EnumSTA,
-  FCM: number,
-): number {
-
+function geta3(STA: EnumSTA, FCM: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -321,7 +345,7 @@ function geta3(
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
     case EnumSTA.RCC_CW_2018: {
-      return NaN
+      return NaN;
     }
   }
 }
@@ -334,7 +358,7 @@ function geta3(
  */
 function getBccByDays(SCO: number, days: number): number {
   //=EXP(S79*(1-(28/S76)^(1/2)))
-  return Math.exp(SCO * (1 - (28 / days) ** (1 / 2)))
+  return Math.exp(SCO * (1 - (28 / days) ** (1 / 2)));
 }
 
 /**
@@ -362,12 +386,12 @@ export function getFcktByDays(FCM: number, SCO: number, days: number): number {
   W76 - FCMT
   */
   let fcmt0 = getFcmtByDays(FCM, SCO, days);
-  return (days > 28) ? FCM - 8 : fcmt0 - 8;
+  return days > 28 ? FCM - 8 : fcmt0 - 8;
 }
 
 /**
- * Retrait Epsilon_cd,t 
- * onglet: Cara béton 
+ * Retrait Epsilon_cd,t
+ * onglet: Cara béton
  * Ligne R32 => ...
  * */
 export async function getBasicECDT(
@@ -379,7 +403,7 @@ export async function getBasicECDT(
   RH: number,
   FCM: number,
   FCK: number,
-  SFC: boolean,
+  SFC: boolean
 ): Promise<number> {
   //=(F20-F21)/((F20-F21)+0.04*SQRT(F31^3))*K26*S31
   //=T36*(72*EXP(-0.046*K22)+75-F19)*(F20-F21)*0.000001/((F20-F21)+T37*F31^2)*1000
@@ -403,23 +427,23 @@ export async function getBasicECDT(
     case EnumSTA.BS_EN_1992_1_1_NA:
     case EnumSTA.EN_1992_3_BS:
     case EnumSTA.NF_EN_1992_3_NA:
-    case EnumSTA.BS_EN_1992_3_NA:
-      {
-        //=(F20-F21)/((F20-F21)+0.04*SQRT(F31^3))*K26*S31
-        /*
+    case EnumSTA.BS_EN_1992_3_NA: {
+      //=(F20-F21)/((F20-F21)+0.04*SQRT(F31^3))*K26*S31
+      /*
         K26 - kh
         S31 - ecd0(STA)
         */
-        let kh = getkh(H0C);
-        let ecd0 = await getEcd0(STA, TYC, FCM, RH);
-        return (TCO - TSC) / ((TCO - TSC) + 0.04 * Math.sqrt(H0C ** 3)) * kh * ecd0;
-      }
+      let kh = getkh(H0C);
+      let ecd0 = await getEcd0(STA, TYC, FCM, RH);
+      return (
+        ((TCO - TSC) / (TCO - TSC + 0.04 * Math.sqrt(H0C ** 3))) * kh * ecd0
+      );
+    }
 
     case EnumSTA.EN1992_2_BS:
-    case EnumSTA.NF_EN_1992_2_NA:
-      {
-        //=T36*(72*EXP(-0.046*K22)+75-F19)*(F20-F21)*0.000001/((F20-F21)+T37*F31^2)*1000
-        /*
+    case EnumSTA.NF_EN_1992_2_NA: {
+      //=T36*(72*EXP(-0.046*K22)+75-F19)*(F20-F21)*0.000001/((F20-F21)+T37*F31^2)*1000
+      /*
           T36 - Kfck
           K22 - FCK
           F19 - RH
@@ -429,13 +453,20 @@ export async function getBasicECDT(
           F31 - H0C
        */
 
-        let Kfck = getKfck(FCK);
-        let bcd = getBcd(SFC);
-        // =   Kfck * (72 * EXP     (-0.046 * FCK) + 75 - RH) * (TCO - TSC) * 0.000001 / ((TCO - TSC) + bcd * H0C ^  2) * 1000
-        return Kfck * (72 * Math.exp(-0.046 * FCK) + 75 - RH) * (TCO - TSC) * 0.000001 / ((TCO - TSC) + bcd * H0C ** 2) * 1000;
-      }
+      let Kfck = getKfck(FCK);
+      let bcd = getBcd(SFC);
+      // =   Kfck * (72 * EXP     (-0.046 * FCK) + 75 - RH) * (TCO - TSC) * 0.000001 / ((TCO - TSC) + bcd * H0C ^  2) * 1000
+      return (
+        ((Kfck *
+          (72 * Math.exp(-0.046 * FCK) + 75 - RH) *
+          (TCO - TSC) *
+          0.000001) /
+          (TCO - TSC + bcd * H0C ** 2)) *
+        1000
+      );
+    }
     case EnumSTA.RCC_CW_2018: {
-      //=X38*X36*(72*EXP(-0.046*K22)+75-F19)*(F20-F21)*0.000001/((F20-F21)+X39*F31^2)*1000      
+      //=X38*X36*(72*EXP(-0.046*K22)+75-F19)*(F20-F21)*0.000001/((F20-F21)+X39*F31^2)*1000
       /*
       X38 - bcd1
       X36 - Kfckp
@@ -452,12 +483,18 @@ export async function getBasicECDT(
       let bcd2 = getBcd2(SFC);
 
       //   =  X38 *  X36 * (72 * EXP     (-0.046 * K22) + 75 - F19) * (F20 - F21)* 0.000001 / ((F20 - F21) + X39 * F31 ^   2) * 1000
-      return bcd1 * Kfck * (72 * Math.exp(-0.046 * FCK) + 75 - RH) * (TCO - TSC) * 0.000001 / ((TCO - TSC) + bcd2 * H0C ** 2) * 1000
+      return (
+        ((bcd1 *
+          Kfck *
+          (72 * Math.exp(-0.046 * FCK) + 75 - RH) *
+          (TCO - TSC) *
+          0.000001) /
+          (TCO - TSC + bcd2 * H0C ** 2)) *
+        1000
+      );
     }
-
   }
 }
-
 
 /**
  * onglet: Cara béton
@@ -480,7 +517,7 @@ export async function getEcd0(
   STA: EnumSTA,
   TYC: EnumTYC,
   FCM: number,
-  RH: number,
+  RH: number
 ): Promise<number> {
   //=0.85*((220+110*K23)*EXP(-K24*F5/10))*0.000001*1.55*(1-(F19/100)^3)*1000
   /*
@@ -495,22 +532,26 @@ export async function getEcd0(
     case EnumSTA.BS_EN_1992_1_1_NA:
     case EnumSTA.EN_1992_3_BS:
     case EnumSTA.NF_EN_1992_3_NA:
-    case EnumSTA.BS_EN_1992_3_NA:
-      {
-        let eds1 = await getSettingValue(TYC, SettingProperty.EDS1);
-        let eds2 = await getSettingValue(TYC, SettingProperty.EDS2);
-        return 0.85 * ((220 + 110 * eds1) * Math.exp(-eds2 * FCM / 10)) * 0.000001 * 1.55 * (1 - (RH / 100) ** 3) * 1000
-      }
+    case EnumSTA.BS_EN_1992_3_NA: {
+      let eds1 = await getSettingValue(TYC, SettingProperty.EDS1);
+      let eds2 = await getSettingValue(TYC, SettingProperty.EDS2);
+      return (
+        0.85 *
+        ((220 + 110 * eds1) * Math.exp((-eds2 * FCM) / 10)) *
+        0.000001 *
+        1.55 *
+        (1 - (RH / 100) ** 3) *
+        1000
+      );
+    }
 
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
-    case EnumSTA.RCC_CW_2018:
-      {
-        return NaN;
-      }
+    case EnumSTA.RCC_CW_2018: {
+      return NaN;
+    }
   }
 }
-
 
 /**
  * onglet: Cara béton
@@ -540,7 +581,7 @@ export function getBcd1(): number {
  * @returns beta_cd2
  */
 export function getBcd2(SFC: boolean): number {
-  return getBcd(SFC)
+  return getBcd(SFC);
 }
 
 /**
@@ -554,9 +595,8 @@ export function getBasicF0C(
   FCM: number,
   RH: number,
   H0C: number,
-  T0C: number,
+  T0C: number
 ): number {
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -566,7 +606,8 @@ export function getBasicF0C(
     case EnumSTA.BS_EN_1992_3_NA: {
       let fRH = getfRH(STA, FCM, RH, H0C);
       let b_fcm = getb_fcm(STA, FCM);
-      let b_t0 = getb_t0(STA, T0C); 1
+      let b_t0 = getb_t0(STA, T0C);
+      1;
       return fRH * b_fcm * b_t0;
     }
 
@@ -578,17 +619,12 @@ export function getBasicF0C(
 }
 
 /**
-* Cara béton
-* Fluage
-* phi_RH
-* R47..
-*/
-function getfRH(
-  STA: EnumSTA,
-  FCM: number,
-  RH: number,
-  H0C: number,
-): number {
+ * Cara béton
+ * Fluage
+ * phi_RH
+ * R47..
+ */
+function getfRH(STA: EnumSTA, FCM: number, RH: number, H0C: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -607,7 +643,9 @@ function getfRH(
       let a1 = geta1(STA, FCM);
       let a2 = geta2(STA, FCM);
 
-      return (FCM <= 35) ? 1 + (1 - RH / 100) / (0.1 * H0C ** (1 / 3)) : (1 + (1 - RH / 100) / (0.1 * H0C ** (1 / 3)) * a1) * a2;
+      return FCM <= 35
+        ? 1 + (1 - RH / 100) / (0.1 * H0C ** (1 / 3))
+        : (1 + ((1 - RH / 100) / (0.1 * H0C ** (1 / 3))) * a1) * a2;
     }
 
     case EnumSTA.EN1992_2_BS:
@@ -624,11 +662,7 @@ function getfRH(
  * beta(fcm)
  * R48..
  */
-function getb_fcm(
-  STA: EnumSTA,
-  FCM: number,
-): number {
-
+function getb_fcm(STA: EnumSTA, FCM: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -637,7 +671,7 @@ function getb_fcm(
     case EnumSTA.NF_EN_1992_3_NA:
     case EnumSTA.BS_EN_1992_3_NA: {
       //=16.8/(SQRT(F5))
-      return 16.8 / (Math.sqrt(FCM));
+      return 16.8 / Math.sqrt(FCM);
     }
 
     case EnumSTA.EN1992_2_BS:
@@ -654,11 +688,7 @@ function getb_fcm(
  * beta(t0)
  * R49..
  */
-function getb_t0(
-  STA: EnumSTA,
-  T0C: number,
-): number {
-
+function getb_t0(STA: EnumSTA, T0C: number): number {
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -666,7 +696,7 @@ function getb_t0(
     case EnumSTA.EN_1992_3_BS:
     case EnumSTA.NF_EN_1992_3_NA:
     case EnumSTA.BS_EN_1992_3_NA:
-      return 1 / (0.1 + T0C ** 0.2)
+      return 1 / (0.1 + T0C ** 0.2);
 
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
@@ -674,7 +704,6 @@ function getb_t0(
       return NaN;
   }
 }
-
 
 /**
  * Onglet: Cara béton
@@ -689,12 +718,8 @@ export function getBasicFBTT0(
   FCM: number,
   SCO: number,
   SFC: boolean,
-  FCK: number,
+  FCK: number
 ): number {
-
-
-
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -706,43 +731,34 @@ export function getBasicFBTT0(
 
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
-    case EnumSTA.RCC_CW_2018:
-      //=T57*SQRT(F20-F22)/(SQRT(F20-F22)+T58)
-      //=X57*SQRT(F20-F22)/(SQRT(F20-F22)+X58)
-      /*
+    case EnumSTA.RCC_CW_2018 /* //=X57*SQRT(F20-F22)/(SQRT(F20-F22)+X58) //=T57*SQRT(F20-F22)/(SQRT(F20-F22)+T58)
       T57;X57 - fb0
       F20 - TCO
       F22 - T0C
       T58;X58 - bbc
 
       =fb0*SQRT(TCO-T0C)/(SQRT(TCO-T0C)+bbc)
-      */
-
-      {
-        let fb0 = getfb0(STA, T0C, SFC, FCM, SCO);
-        let bbc = getBbc(STA, T0C, FCM, SCO, SFC, FCK);
-        return fb0 * Math.sqrt(TCO - T0C) / (Math.sqrt(TCO - T0C) + bbc);
-      }
-
-
-
+      */: {
+      let fb0 = getfb0(STA, T0C, SFC, FCM, SCO);
+      let bbc = getBbc(STA, T0C, FCM, SCO, SFC, FCK);
+      return (fb0 * Math.sqrt(TCO - T0C)) / (Math.sqrt(TCO - T0C) + bbc);
+    }
   }
 }
 
 /**
-* Cara béton
-* Fluage
-* phi.b0
-* R57..
-*/
+ * Cara béton
+ * Fluage
+ * phi.b0
+ * R57..
+ */
 function getfb0(
   STA: EnumSTA,
   T0C: number,
   SFC: boolean,
   FCM: number,
-  SCO: number,
+  SCO: number
 ): number {
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -752,48 +768,44 @@ function getfb0(
     case EnumSTA.BS_EN_1992_3_NA:
       return NaN;
 
-
     case EnumSTA.EN1992_2_BS:
-    case EnumSTA.NF_EN_1992_2_NA:
-      {
-        //=IF(F25=J17;3.6/(W76^0.37);1.4)
-        /*
+    case EnumSTA.NF_EN_1992_2_NA: {
+      //=IF(F25=J17;3.6/(W76^0.37);1.4)
+      /*
         F25=J17 - SFC
         W76     - fcmt(t0)
         */
-        let days = T0C;
-        let fcmt0 = getFcmtByDays(FCM, SCO, days);
-        return SFC ? 3.6 / (fcmt0 ** 0.37) : 1.4;
-      }
-    case EnumSTA.RCC_CW_2018:
-      {
-        //=IF(J26=N17;3.6/(W77^0.37);1.4)
-        /*
+      let days = T0C;
+      let fcmt0 = getFcmtByDays(FCM, SCO, days);
+      return SFC ? 3.6 / fcmt0 ** 0.37 : 1.4;
+    }
+    case EnumSTA.RCC_CW_2018: {
+      //=IF(J26=N17;3.6/(W77^0.37);1.4)
+      /*
         J26=N17 - SFC
         W77     - fckt(t0)
         */
-        let days = T0C;
-        let fckt0 = getFcktByDays(FCM, SCO, days);
-        return SFC ? 3.6 / (fckt0 ** 0.37) : 1.4;
-      }
+      let days = T0C;
+      let fckt0 = getFcktByDays(FCM, SCO, days);
+      return SFC ? 3.6 / fckt0 ** 0.37 : 1.4;
+    }
   }
 }
 
 /**
-* Cara béton
-* Fluage
-* beta.bc
-* R58..
-*/
+ * Cara béton
+ * Fluage
+ * beta.bc
+ * R58..
+ */
 function getBbc(
   STA: EnumSTA,
   T0C: number,
   FCM: number,
   SCO: number,
   SFC: boolean,
-  FCK: number,
+  FCK: number
 ): number {
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -815,15 +827,19 @@ function getBbc(
 
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
-    case EnumSTA.RCC_CW_2018:
-      {
-        // IF(SFC;0.37*EXP(2.8*fcmt/FCK);0.4*EXP(3.1*fcmt/FCK))
-        // IF(SFC;0.37*EXP(2.8*fckt/FCK);0.4*EXP(3.1*fckt/FCK))
-        let days = T0C;
-        let fcXt = (STA == EnumSTA.RCC_CW_2018) ? getFcktByDays(FCM, SCO, days) : getFcmtByDays(FCM, SCO, days);
+    case EnumSTA.RCC_CW_2018: {
+      // IF(SFC;0.37*EXP(2.8*fcmt/FCK);0.4*EXP(3.1*fcmt/FCK))
+      // IF(SFC;0.37*EXP(2.8*fckt/FCK);0.4*EXP(3.1*fckt/FCK))
+      let days = T0C;
+      let fcXt =
+        STA == EnumSTA.RCC_CW_2018
+          ? getFcktByDays(FCM, SCO, days)
+          : getFcmtByDays(FCM, SCO, days);
 
-        return SFC ? 0.37 * Math.exp(2.8 * fcXt / FCK) : 0.4 * Math.exp(3.1 * fcXt / FCK);
-      }
+      return SFC
+        ? 0.37 * Math.exp((2.8 * fcXt) / FCK)
+        : 0.4 * Math.exp((3.1 * fcXt) / FCK);
+    }
   }
 }
 
@@ -834,7 +850,7 @@ function getBbc(
  * @returns radians
  */
 export function getRadians(degrees: number): number {
-  let radians = degrees * Math.PI / 180;
+  let radians = (degrees * Math.PI) / 180;
   return radians;
 }
 
@@ -845,7 +861,7 @@ export function getRadians(degrees: number): number {
  * @returns degrees
  */
 export function getDegrees(radians: number): number {
-  let degrees = radians * 180 / Math.PI;
+  let degrees = (radians * 180) / Math.PI;
   return degrees;
 }
 
@@ -866,25 +882,18 @@ export function getKByD(d: number): number {
  * @param d
  * @returns
  */
-export function getVminByD(
-  d: number,
-  STA: EnumSTA,
-  SFS: EnumSFS,
-  FCK: number,
-) {
-
+export function getVminByD(d: number, STA: EnumSTA, SFS: EnumSFS, FCK: number) {
   // special cases
   switch (STA) {
     case EnumSTA.NF_EN_1992_1_1_NA:
     case EnumSTA.NF_EN_1992_2_NA:
-    case EnumSTA.NF_EN_1992_3_NA:
-      {
-        switch (SFS) {
-          case EnumSFS.TRSLAB: // Dalle bénéficiant d'un effet de redistribution transversale
-          case EnumSFS.WALLA: // Voile
-            return 0.23 * FCK ** (1 / 2);
-        }
+    case EnumSTA.NF_EN_1992_3_NA: {
+      switch (SFS) {
+        case EnumSFS.TRSLAB: // Dalle bénéficiant d'un effet de redistribution transversale
+        case EnumSFS.WALLA: // Voile
+          return 0.23 * FCK ** (1 / 2);
       }
+    }
   }
 
   // for all other cases
@@ -911,20 +920,25 @@ export function checkTorsionParams(
   BFL: number,
   FYK: number,
   GSF: number,
-  GACF: number,
+  GACF: number
 ) {
-  if (GTF >= HFL)
-    throw "calcul impossible: gt doit être inférieur à h"
+  if (GTF >= HFL) throw 'calcul impossible: gt doit être inférieur à h';
   else if (GCF >= HFL - GTF)
-    throw "calcul impossible: gc doit être inférieur à h - gt"
-  else if (GCF >= BFL)
-    throw "calcul impossible: gc doit être inférieur à b"
+    throw 'calcul impossible: gc doit être inférieur à h - gt';
+  else if (GCF >= BFL) throw 'calcul impossible: gc doit être inférieur à b';
   else if (GCF >= BFL - GCF)
-    throw "calcul impossible: gc doit être inférieur à b/2"
-  else
-    if (FYK == 0 || BFL == 0 || HFL == 0 || GCF == 0 || GTF == 0 || GSF == 0 || GACF == 0) {
-      throw "calcul impossible: Certaines valeurs nulles rendent le calcul impossible";
-    }
+    throw 'calcul impossible: gc doit être inférieur à b/2';
+  else if (
+    FYK == 0 ||
+    BFL == 0 ||
+    HFL == 0 ||
+    GCF == 0 ||
+    GTF == 0 ||
+    GSF == 0 ||
+    GACF == 0
+  ) {
+    throw 'calcul impossible: Certaines valeurs nulles rendent le calcul impossible';
+  }
 }
 
 /**
@@ -950,12 +964,22 @@ export function getTrdMax(
   STR_TO: number,
   N622X06: number,
   ACW: number,
-  TEF: number,
+  TEF: number
 ): number {
   let ak = (HFL - TEF) * (BFL - TEF);
   let fcd = getFcd(ACC, FCK, GACF);
   let teta = getRadians(STR_TO);
-  return 2 * N622X06 * ACW * fcd * ak * TEF * Math.sin(teta) * Math.cos(teta) * 1000000;
+  return (
+    2 *
+    N622X06 *
+    ACW *
+    fcd *
+    ak *
+    TEF *
+    Math.sin(teta) *
+    Math.cos(teta) *
+    1000000
+  );
 }
 
 /**
@@ -966,7 +990,7 @@ export function getTrdMax(
  * @returns fcd
  */
 export function getFcd(ACC: number, FCK: number, GACF: number): number {
-  return ACC * FCK / GACF;
+  return (ACC * FCK) / GACF;
 }
 
 /**
@@ -986,9 +1010,9 @@ export function getTrdc(
   GACF: number,
   HFL: number,
   BFL: number,
-  TEF: number,
+  TEF: number
 ): number {
-  let fctd = ACT * FCTK005 / GACF;
+  let fctd = (ACT * FCTK005) / GACF;
 
   let ak = (HFL - TEF) * (BFL - TEF);
   let trdc = TEF * 2 * ak * fctd * 1000000;
@@ -1014,12 +1038,20 @@ export function getVrdMax(
   teta: number,
   fcd: number,
   ACW: number,
-  N1TO: number,
+  N1TO: number
 ): number {
-
-  return ACW * fl * 0.9 * d * N1TO * fcd * (Math.cos(teta) / Math.sin(teta) + Math.cos(alpha) / Math.sin(alpha)) / (1 + (Math.cos(teta) / Math.sin(teta)) ** 2) * 1000000;
+  return (
+    ((ACW *
+      fl *
+      0.9 *
+      d *
+      N1TO *
+      fcd *
+      (Math.cos(teta) / Math.sin(teta) + Math.cos(alpha) / Math.sin(alpha))) /
+      (1 + (Math.cos(teta) / Math.sin(teta)) ** 2)) *
+    1000000
+  );
 }
-
 
 /**
  * Gets vrdc coef by different params
@@ -1044,10 +1076,15 @@ export function getVrdc(
   vmin: number,
   CRDC622: number,
   FCK: number,
-  K1622: number,
+  K1622: number
 ): number {
-
-  return Math.max((CRDC622 * k * (100 * rol * FCK) ** (1 / 3) + K1622 * sigmaCp) * fl * d, (vmin + K1622 * sigmaCp) * fl * d, 0.0001) * 1000000;
+  return (
+    Math.max(
+      (CRDC622 * k * (100 * rol * FCK) ** (1 / 3) + K1622 * sigmaCp) * fl * d,
+      (vmin + K1622 * sigmaCp) * fl * d,
+      0.0001
+    ) * 1000000
+  );
 }
 
 /**
@@ -1058,13 +1095,8 @@ export function getVrdc(
  * @param ASLSF
  * @returns rol
  */
-export function getRolByD(
-  d: number,
-  fl: number,
-  ASLSF: number,
-): number {
-
-  return Math.min(ASLSF * 0.0001 / (fl * d), 0.02)
+export function getRolByD(d: number, fl: number, ASLSF: number): number {
+  return Math.min((ASLSF * 0.0001) / (fl * d), 0.02);
 }
 
 /**
@@ -1082,12 +1114,10 @@ export function getSigmaCp(
   h: number,
   b: number,
   KUNIT: number,
-  fcd: number,
-
+  fcd: number
 ): number {
-
   let ac = b * h; // en m²
-  return Math.min(ned * KUNIT * 0.000001 / ac, 0.2 * fcd);
+  return Math.min((ned * KUNIT * 0.000001) / ac, 0.2 * fcd);
 }
 
 /**
@@ -1099,8 +1129,16 @@ export function getSigmaCp(
  * @param AM0D
  * @returns IF($O$5="Charges réparties";D6*POWER($D$21;2)/$W$20*$D$15;D6*$D$15)
  */
-export function getMp(ENT: EnumENT, MPSF: number, LEFFD: number, W20: number, AM0D: number): number {
-  return ENT === EnumENT.LOADS ? MPSF * Math.pow(LEFFD, 2) / W20 * AM0D : MPSF * AM0D;
+export function getMp(
+  ENT: EnumENT,
+  MPSF: number,
+  LEFFD: number,
+  W20: number,
+  AM0D: number
+): number {
+  return ENT === EnumENT.LOADS
+    ? ((MPSF * Math.pow(LEFFD, 2)) / W20) * AM0D
+    : MPSF * AM0D;
 }
 
 /**
@@ -1112,8 +1150,16 @@ export function getMp(ENT: EnumENT, MPSF: number, LEFFD: number, W20: number, AM
  * @param AM0D
  * @returns IF($O$5="Charges réparties";D7*POWER($D$21;2)/$W$20*$D$15;D7*$D$15)
  */
-export function getMc(ENT: EnumENT, MCSF: number, LEFFD: number, W20: number, AM0D: number): number {
-  return ENT === EnumENT.LOADS ? MCSF * Math.pow(LEFFD, 2) / W20 * AM0D : MCSF * AM0D;
+export function getMc(
+  ENT: EnumENT,
+  MCSF: number,
+  LEFFD: number,
+  W20: number,
+  AM0D: number
+): number {
+  return ENT === EnumENT.LOADS
+    ? ((MCSF * Math.pow(LEFFD, 2)) / W20) * AM0D
+    : MCSF * AM0D;
 }
 
 /**
@@ -1125,8 +1171,16 @@ export function getMc(ENT: EnumENT, MCSF: number, LEFFD: number, W20: number, AM
  * @param AM0D
  * @returns IF($O$5="Charges réparties";D8*POWER($D$21;2)/$W$20*$D$15;D8*$D$15)
  */
-export function getMr(ENT: EnumENT, MRSF: number, LEFFD: number, W20: number, AM0D: number): number {
-  return ENT === EnumENT.LOADS ? MRSF * Math.pow(LEFFD, 2) / W20 * AM0D : MRSF * AM0D;
+export function getMr(
+  ENT: EnumENT,
+  MRSF: number,
+  LEFFD: number,
+  W20: number,
+  AM0D: number
+): number {
+  return ENT === EnumENT.LOADS
+    ? ((MRSF * Math.pow(LEFFD, 2)) / W20) * AM0D
+    : MRSF * AM0D;
 }
 
 /**
@@ -1138,8 +1192,16 @@ export function getMr(ENT: EnumENT, MRSF: number, LEFFD: number, W20: number, AM
  * @param AM0D
  * @returns IF($O$5="Charges réparties";D9*POWER($D$21;2)/$W$20*$D$15;D9*$D$15)
  */
-export function getMq(ENT: EnumENT, MQSF: number, LEFFD: number, W20: number, AM0D: number): number {
-  return ENT === EnumENT.LOADS ? MQSF * Math.pow(LEFFD, 2) / W20 * AM0D : MQSF * AM0D;
+export function getMq(
+  ENT: EnumENT,
+  MQSF: number,
+  LEFFD: number,
+  W20: number,
+  AM0D: number
+): number {
+  return ENT === EnumENT.LOADS
+    ? ((MQSF * Math.pow(LEFFD, 2)) / W20) * AM0D
+    : MQSF * AM0D;
 }
 
 /**
@@ -1171,21 +1233,34 @@ export function getD(HFL: number, GTF: number): number {
 }
 
 /**
-* Position de l'axe neutre en section non fissurée à l'ELS
-* Excel: Fleche!D80 y
-* @param BFL  D22
-* @param HFL  D23
-* @param SCEC D36
-* @param ASTD D26
-* @param d    D79
-* @param ASCD D29
-* @param GCF  D28
-* @returns (D22*D23*D23/2+D36*D26*D79/10000+D36*D29*D28/10000)/(D22*D23+D36*D26/10000+D36*D29/10000)
-* duplicate dld92
-*/
-export function getY(BFL: number, HFL: number, SCEC: number, ASTD: number, d: number, ASCD: number, GCF: number): number {
+ * Position de l'axe neutre en section non fissurée à l'ELS
+ * Excel: Fleche!D80 y
+ * @param BFL  D22
+ * @param HFL  D23
+ * @param SCEC D36
+ * @param ASTD D26
+ * @param d    D79
+ * @param ASCD D29
+ * @param GCF  D28
+ * @returns (D22*D23*D23/2+D36*D26*D79/10000+D36*D29*D28/10000)/(D22*D23+D36*D26/10000+D36*D29/10000)
+ * duplicate dld92
+ */
+export function getY(
+  BFL: number,
+  HFL: number,
+  SCEC: number,
+  ASTD: number,
+  d: number,
+  ASCD: number,
+  GCF: number
+): number {
   //=(D22*D23*D23/2+D36*D26*D79/10000+D36*D29*D28/10000)/(D22*D23+D36*D26/10000+D36*D29/10000)
-  return (BFL * HFL * HFL / 2 + SCEC * ASTD * d / 10000 + SCEC * ASCD * GCF / 10000) / (BFL * HFL + SCEC * ASTD / 10000 + SCEC * ASCD / 10000);
+  return (
+    ((BFL * HFL * HFL) / 2 +
+      (SCEC * ASTD * d) / 10000 +
+      (SCEC * ASCD * GCF) / 10000) /
+    (BFL * HFL + (SCEC * ASTD) / 10000 + (SCEC * ASCD) / 10000)
+  );
 }
 
 /**
@@ -1199,7 +1274,14 @@ export function getY(BFL: number, HFL: number, SCEC: number, ASTD: number, d: nu
  * @param d    D79
  * @returns (SQRT(D36^2*(D26/10000+D29/10000)^2+2*D36*D22*(D29*D28/10000+D26*D79/10000))-D36*(D29/10000+D26/10000))/D22
  */
-export function getX(SCEC: number, ASTD: number, ASCD: number, BFL: number, GCF: number, d: number): number {
+export function getX(
+  SCEC: number,
+  ASTD: number,
+  ASCD: number,
+  BFL: number,
+  GCF: number,
+  d: number
+): number {
   /*
   D36 SCEC
   D26 ASTD
@@ -1208,7 +1290,14 @@ export function getX(SCEC: number, ASTD: number, ASCD: number, BFL: number, GCF:
   D28 GCF
   D79 d
   */
-  return (Math.sqrt(SCEC ** 2 * (ASTD / 10000 + ASCD / 10000) ** 2 + 2 * SCEC * BFL * (ASCD * GCF / 10000 + ASTD * d / 10000)) - SCEC * (ASCD / 10000 + ASTD / 10000)) / BFL;
+  return (
+    (Math.sqrt(
+      SCEC ** 2 * (ASTD / 10000 + ASCD / 10000) ** 2 +
+        2 * SCEC * BFL * ((ASCD * GCF) / 10000 + (ASTD * d) / 10000)
+    ) -
+      SCEC * (ASCD / 10000 + ASTD / 10000)) /
+    BFL
+  );
 }
 
 /**
@@ -1224,8 +1313,22 @@ export function getX(SCEC: number, ASTD: number, ASCD: number, BFL: number, GCF:
  * @returns D22*POWER(D23;3)/12+D22*D23*POWER(D80-D23/2;2)+D36*D26/10000*POWER(D79-D80;2)+D36*D29/10000*POWER(D80-D28;2)
  * duplicate dld92
  */
-export function getLh(BFL: number, HFL: number, y: number, SCEC: number, ASTD: number, d: number, ASCD: number, GCF: number): any {
-  return BFL * Math.pow(HFL, 3) / 12 + BFL * HFL * Math.pow(y - HFL / 2, 2) + SCEC * ASTD / 10000 * Math.pow(d - y, 2) + SCEC * ASCD / 10000 * Math.pow(y - GCF, 2);
+export function getLh(
+  BFL: number,
+  HFL: number,
+  y: number,
+  SCEC: number,
+  ASTD: number,
+  d: number,
+  ASCD: number,
+  GCF: number
+): any {
+  return (
+    (BFL * Math.pow(HFL, 3)) / 12 +
+    BFL * HFL * Math.pow(y - HFL / 2, 2) +
+    ((SCEC * ASTD) / 10000) * Math.pow(d - y, 2) +
+    ((SCEC * ASCD) / 10000) * Math.pow(y - GCF, 2)
+  );
 }
 
 /**
@@ -1239,8 +1342,20 @@ export function getLh(BFL: number, HFL: number, y: number, SCEC: number, ASTD: n
  * @param ASCD
  * @returns D22*POWER(D81;3)/3+D36*(POWER((D79-D81);2)*D26/10000)+D36*(POWER((D81-D28);2)*D29/10000)
  */
-export function getLe(BFL: number, x: number, SCEC: number, d: number, ASTD: number, GCF: number, ASCD: number): number {
-  return BFL * Math.pow(x, 3) / 3 + SCEC * (Math.pow((d - x), 2) * ASTD / 10000) + SCEC * (Math.pow((x - GCF), 2) * ASCD / 10000)
+export function getLe(
+  BFL: number,
+  x: number,
+  SCEC: number,
+  d: number,
+  ASTD: number,
+  GCF: number,
+  ASCD: number
+): number {
+  return (
+    (BFL * Math.pow(x, 3)) / 3 +
+    SCEC * ((Math.pow(d - x, 2) * ASTD) / 10000) +
+    SCEC * ((Math.pow(x - GCF, 2) * ASCD) / 10000)
+  );
 }
 
 /**
@@ -1250,8 +1365,10 @@ export function getLe(BFL: number, x: number, SCEC: number, d: number, ASTD: num
  */
 export function getMoment(STD: EnumSTD): number {
   switch (STD) {
-    case EnumSTD.CBEAM: return 8;
-    case EnumSTD.CANTILEVER: return 2;
+    case EnumSTD.CBEAM:
+      return 8;
+    case EnumSTD.CANTILEVER:
+      return 2;
   }
 }
 
@@ -1262,8 +1379,10 @@ export function getMoment(STD: EnumSTD): number {
  */
 export function getFlecheTotal(STD: EnumSTD): number {
   switch (STD) {
-    case EnumSTD.CBEAM: return 9.6;
-    case EnumSTD.CANTILEVER: return 4;
+    case EnumSTD.CBEAM:
+      return 9.6;
+    case EnumSTD.CANTILEVER:
+      return 4;
   }
 }
 
@@ -1286,7 +1405,7 @@ export function checkInvalidEluFlexionValues(
   GCF: number,
   GTF: number,
   GSF: number,
-  GACF: number,
+  GACF: number
 ) {
   if (
     (NELU >= 0 && MELU == 0) ||
@@ -1295,14 +1414,12 @@ export function checkInvalidEluFlexionValues(
     GCF == 0 ||
     GTF == 0 ||
     GSF == 0 ||
-    GACF == 0)
-    throw "Certaines valeurs nulles rendent le calcul impossible"
-  else if (GTF >= HFL / 2)
-    throw "_GTF doit être inférieur à _HFL/2"
-  else if (GCF >= HFL / 2)
-    throw "_GCF doit être inférieur à _HFL/2"
-  else if (GCF >= HFL - GTF)
-    throw "_GCF doit être inférieur à _HFL - _GTF"
+    GACF == 0
+  )
+    throw 'Certaines valeurs nulles rendent le calcul impossible';
+  else if (GTF >= HFL / 2) throw '_GTF doit être inférieur à _HFL/2';
+  else if (GCF >= HFL / 2) throw '_GCF doit être inférieur à _HFL/2';
+  else if (GCF >= HFL - GTF) throw '_GCF doit être inférieur à _HFL - _GTF';
 }
 
 /**
@@ -1344,14 +1461,15 @@ export function checkInvalidElsFlexionValues(
   STA: EnumSTA,
   BFL: number,
   GSF: number,
-  GACF: number) {
-
+  GACF: number
+) {
   if (Mscara < 0 || Msquasi < 0) {
-    throw "Rentrer des moments M positifs";
+    throw 'Rentrer des moments M positifs';
     //Worksheets("Flexion").Range("B40:B45").Value = ""
     //return
   }
-  if (ASTB == 0 ||
+  if (
+    ASTB == 0 ||
     (MELSC == 0 && NELSC == 0) ||
     (MELSQ == 0 && NELSQ == 0) ||
     (MELSF == 0 && NELSF == 0 && STA === EnumSTA.RCC_CW_2018) ||
@@ -1360,8 +1478,9 @@ export function checkInvalidElsFlexionValues(
     GCF == 0 ||
     GTF == 0 ||
     GSF == 0 ||
-    GACF == 0) {
-    throw "Certaines valeurs nulles rendent le calcul impossible";
+    GACF == 0
+  ) {
+    throw 'Certaines valeurs nulles rendent le calcul impossible';
     //Worksheets("Flexion").Range("B40:B45").Value = ""
     //return
   }
@@ -1375,22 +1494,16 @@ export function checkInvalidElsFlexionValues(
  * @param D
  * @returns
  */
-export function equ2(
-  a: number,
-  b: number,
-  c: number,
-  D: number,
-): number {
+export function equ2(a: number, b: number, c: number, D: number): number {
+  let delta: number;
+  let x1: number;
+  let x2: number;
 
-  let delta: number
-  let x1: number
-  let x2: number
-
-  delta = b ** 2 - 4 * a * c
+  delta = b ** 2 - 4 * a * c;
 
   if (delta > 0) {
-    x1 = (-b + delta ** 0.5) / (2 * a)
-    x2 = (-b + delta ** 0.5) / (2 * a)
+    x1 = (-b + delta ** 0.5) / (2 * a);
+    x2 = (-b + delta ** 0.5) / (2 * a);
     if (x1 > 0 && x1 < D) {
       return x1;
     } else {
@@ -1399,7 +1512,6 @@ export function equ2(
   } else {
     return -b / (2 * a);
   }
-
 }
 
 /**
@@ -1418,85 +1530,75 @@ export function equ3(
   c: number,
   D: number,
   e: number,
-  F: number,
+  F: number
 ): number {
-
-  let a0: number
-  let a1: number
-  let a2: number
-  let a3: number
-  let p: number
-  let delta: number
-  let w: number
-  let u: number
-  let v: number
-  let t: number
-  let x1: number
-  let x2: number
-  let x3: number
-  let q: number
-
+  let a0: number;
+  let a1: number;
+  let a2: number;
+  let a3: number;
+  let p: number;
+  let delta: number;
+  let w: number;
+  let u: number;
+  let v: number;
+  let t: number;
+  let x1: number;
+  let x2: number;
+  let x3: number;
+  let q: number;
 
   if (b == 0 && c == 0) {
-
-    return (-D / a) ** (1 / 3)
-  }
-  else {
-
-    a0 = D / a
-    a1 = c / a
-    a2 = b / a
-    a3 = a2 / 3
-    p = a1 - a3 * a2
-    q = a0 - a1 * a3 + 2 * a3 ** 3
-    delta = (q / 2) ** 2 + (p / 3) ** 3
+    return (-D / a) ** (1 / 3);
+  } else {
+    a0 = D / a;
+    a1 = c / a;
+    a2 = b / a;
+    a3 = a2 / 3;
+    p = a1 - a3 * a2;
+    q = a0 - a1 * a3 + 2 * a3 ** 3;
+    delta = (q / 2) ** 2 + (p / 3) ** 3;
 
     if (delta > 0) {
-      if ((-q / 2 + delta ** (1 / 2)) < 0) {
-        w = -((-(-q / 2 + delta ** (1 / 2))) ** (1 / 3))
+      if (-q / 2 + delta ** (1 / 2) < 0) {
+        w = -((-(-q / 2 + delta ** (1 / 2))) ** (1 / 3));
+      } else {
+        w = (-q / 2 + delta ** (1 / 2)) ** (1 / 3);
       }
-      else {
-        w = (-q / 2 + delta ** (1 / 2)) ** (1 / 3)
-      }
-      return w - p / 3 / w - a3
+      return w - p / 3 / w - a3;
     }
 
     if (delta == 0) {
-      x1 = 3 * q / p - a3
-      x2 = -3 * q / 2 / p - a3
+      x1 = (3 * q) / p - a3;
+      x2 = (-3 * q) / 2 / p - a3;
 
       if (x1 + F > 0 && x1 + F < e) {
-        return x1
+        return x1;
       }
 
       if (x2 + F > 0 && x2 + F < e) {
-        return x2
+        return x2;
       }
-
     }
 
     if (delta < 0) {
+      u = 2 * (-p / 3) ** 0.5;
+      v = -q / 2 / (-p / 3) ** (3 / 2);
+      t = Math.acos(v) / 3;
 
-      u = 2 * (-p / 3) ** 0.5
-      v = -q / 2 / (-p / 3) ** (3 / 2)
-      t = Math.acos(v) / 3
-
-
-      x1 = u * Math.cos(t) - a3
-      x2 = u * Math.cos(t + 2 * Math.PI / 3) - a3
-      x3 = u * Math.cos(t + 4 * Math.PI / 3) - a3
-
+      x1 = u * Math.cos(t) - a3;
+      x2 = u * Math.cos(t + (2 * Math.PI) / 3) - a3;
+      x3 = u * Math.cos(t + (4 * Math.PI) / 3) - a3;
 
       if (x2 + F > 0 && x2 + F < e) {
-        return x2
+        return x2;
       }
 
       if (x3 + F > 0 && x3 + F < e) {
-        return x3
+        return x3;
       }
 
       if (x1 + F > 0 && x1 + F < e) {
-        return x1
+        return x1;
       }
     }
   }
@@ -1510,16 +1612,10 @@ export function equ3(
  * @param b
  * @returns '<' if a<b, '=' if a==b and '>' if a>b
  */
-export function compareInfo(
-  a: number,
-  b: number): string {
-
-  if (a < b)
-    return "<"
-  else if (a == b)
-    return "="
-  else
-    return ">"
+export function compareInfo(a: number, b: number): string {
+  if (a < b) return '<';
+  else if (a == b) return '=';
+  else return '>';
 }
 
 /**
@@ -1546,60 +1642,87 @@ export function getSigmaC(
   Ast: number,
   Asc: number,
   n: number,
-  Mom: number,
+  Mom: number
 ): number {
+  let sigc: number;
 
-  let sigc: number
+  let x: number, Ine: number, mom2: number;
 
-  let x: number,
-    Ine: number,
-    mom2: number
-
-  let vc = (GCF * AEF * Asc + HFL / 2 * BFL * HFL + d * AEF * Ast) / (AEF * Asc + AEF * Ast + BFL * HFL)
+  let vc =
+    (GCF * AEF * Asc + (HFL / 2) * BFL * HFL + d * AEF * Ast) /
+    (AEF * Asc + AEF * Ast + BFL * HFL);
 
   if (n == 0) {
     //'flexion simple
 
-    x = equ2(BFL / 2, AEF * Asc + AEF * Ast, -AEF * GCF * Asc - AEF * d * Ast, HFL)
-    let Ine = BFL * x * x * x / 3 + AEF * Ast * (d - x) * (d - x) + AEF * (x - GCF) ** 2 * Asc
-    sigc = Mom * x / Ine
+    x = equ2(
+      BFL / 2,
+      AEF * Asc + AEF * Ast,
+      -AEF * GCF * Asc - AEF * d * Ast,
+      HFL
+    );
+    let Ine =
+      (BFL * x * x * x) / 3 +
+      AEF * Ast * (d - x) * (d - x) +
+      AEF * (x - GCF) ** 2 * Asc;
+    sigc = (Mom * x) / Ine;
     if (sigc < 0) {
-      sigc = 0
+      sigc = 0;
     }
-  }
-  else if (n > 0 && Mom / n - (HFL / 2 - vc) <= HFL / 6 && Mom / n - (HFL / 2 - vc) >= -HFL / 6) {
+  } else if (
+    n > 0 &&
+    Mom / n - (HFL / 2 - vc) <= HFL / 6 &&
+    Mom / n - (HFL / 2 - vc) >= -HFL / 6
+  ) {
     // section entierement comprimée
 
-    x = (AEF * Ast * d + AEF * Asc * GCF + BFL * HFL * HFL / 2) / (AEF * Ast + AEF * Asc + BFL * HFL)
-    mom2 = Mom + n * (x - HFL / 2)
-    Ine = BFL * HFL ** 3 / 3 - BFL * HFL * x ** 2 + AEF * Ast * (d ** 2 - x ** 2) + AEF * Asc * (GCF ** 2 - x ** 2)
-    sigc = Math.max(Math.abs(n / (BFL * HFL + AEF * Ast + AEF * Asc) + mom2 * x / Ine), Math.abs(n / (BFL * HFL + AEF * Ast + AEF * Asc) - mom2 * (HFL - x) / Ine))
-  }
-  else if (n < 0 && (Mom / n >= -(HFL / 2 - GCF) && Mom / n <= (HFL / 2 - GTF))) {
+    x =
+      (AEF * Ast * d + AEF * Asc * GCF + (BFL * HFL * HFL) / 2) /
+      (AEF * Ast + AEF * Asc + BFL * HFL);
+    mom2 = Mom + n * (x - HFL / 2);
+    Ine =
+      (BFL * HFL ** 3) / 3 -
+      BFL * HFL * x ** 2 +
+      AEF * Ast * (d ** 2 - x ** 2) +
+      AEF * Asc * (GCF ** 2 - x ** 2);
+    sigc = Math.max(
+      Math.abs(n / (BFL * HFL + AEF * Ast + AEF * Asc) + (mom2 * x) / Ine),
+      Math.abs(
+        n / (BFL * HFL + AEF * Ast + AEF * Asc) - (mom2 * (HFL - x)) / Ine
+      )
+    );
+  } else if (n < 0 && Mom / n >= -(HFL / 2 - GCF) && Mom / n <= HFL / 2 - GTF) {
     // section entièrement tendue
 
-    x = 0
+    x = 0;
     if (Asc == 0) {
-      throw "Section entièrement tendue, donner une valeur de Asc"
+      throw 'Section entièrement tendue, donner une valeur de Asc';
     } else {
-      sigc = 0
+      sigc = 0;
     }
   } else {
     // section partiellement comprimée
 
-    let ce = HFL / 2 - Mom / n
-    let p = -3 * ce ** 2 + 6 * AEF * Ast / BFL * (d - ce) + 6 * AEF * Asc / BFL * (GCF - ce)
-    let q = -2 * ce ** 3 - 6 * AEF * Ast / BFL * (d - ce) ** 2 - 6 * AEF * Asc / BFL * (GCF - ce) ** 2
+    let ce = HFL / 2 - Mom / n;
+    let p =
+      -3 * ce ** 2 +
+      ((6 * AEF * Ast) / BFL) * (d - ce) +
+      ((6 * AEF * Asc) / BFL) * (GCF - ce);
+    let q =
+      -2 * ce ** 3 -
+      ((6 * AEF * Ast) / BFL) * (d - ce) ** 2 -
+      ((6 * AEF * Asc) / BFL) * (GCF - ce) ** 2;
 
-    let y = equ3(1, 0, p, q, HFL, ce)
+    let y = equ3(1, 0, p, q, HFL, ce);
 
-    x = y + ce
-    sigc = n * x / (0.5 * BFL * (x ** 2) - AEF * Ast * (d - x) - AEF * Asc * (GCF - x))
+    x = y + ce;
+    sigc =
+      (n * x) /
+      (0.5 * BFL * x ** 2 - AEF * Ast * (d - x) - AEF * Asc * (GCF - x));
   }
 
   return sigc;
 }
-
 
 /**
  * Flexion tab
@@ -1625,13 +1748,11 @@ export function getSigmaS(
   Ast: number,
   Asc: number,
   n: number,
-  mom: number,
+  mom: number
 ): number {
-
   let sigs: number;
 
-  let
-    sigc: number,
+  let sigc: number,
     x: number,
     ce: number,
     p: number,
@@ -1641,46 +1762,76 @@ export function getSigmaS(
     mom2: number,
     Ine: number;
 
-  vc = (GCF * AEF * Asc + HFL / 2 * BFL * HFL + d * AEF * Ast) / (AEF * Asc + AEF * Ast + BFL * HFL)
+  vc =
+    (GCF * AEF * Asc + (HFL / 2) * BFL * HFL + d * AEF * Ast) /
+    (AEF * Asc + AEF * Ast + BFL * HFL);
 
   if (n == 0) {
     // flexion simple
 
-    x = equ2(BFL / 2, AEF * Asc + AEF * Ast, -AEF * GCF * Asc - AEF * d * Ast, HFL)
-    Ine = BFL * x * x * x / 3 + AEF * Ast * (d - x) * (d - x) + AEF * (x - GCF) ** 2 * Asc
+    x = equ2(
+      BFL / 2,
+      AEF * Asc + AEF * Ast,
+      -AEF * GCF * Asc - AEF * d * Ast,
+      HFL
+    );
+    Ine =
+      (BFL * x * x * x) / 3 +
+      AEF * Ast * (d - x) * (d - x) +
+      AEF * (x - GCF) ** 2 * Asc;
 
-    sigs = AEF * mom * (d - x) / Ine
-  }
-  else if (n > 0 && mom / n - (HFL / 2 - vc) <= HFL / 6 && mom / n - (HFL / 2 - vc) >= -HFL / 6) {
+    sigs = (AEF * mom * (d - x)) / Ine;
+  } else if (
+    n > 0 &&
+    mom / n - (HFL / 2 - vc) <= HFL / 6 &&
+    mom / n - (HFL / 2 - vc) >= -HFL / 6
+  ) {
     // section entierement comprimée
 
-    x = (AEF * Ast * d + AEF * Asc * GCF + BFL * HFL * HFL / 2) / (AEF * Ast + AEF * Asc + BFL * HFL)
-    mom2 = mom + n * (x - HFL / 2)
-    Ine = BFL * HFL ** 3 / 3 - BFL * HFL * x ** 2 + AEF * Ast * (d ** 2 - x ** 2) + AEF * Asc * (GCF ** 2 - x ** 2)
+    x =
+      (AEF * Ast * d + AEF * Asc * GCF + (BFL * HFL * HFL) / 2) /
+      (AEF * Ast + AEF * Asc + BFL * HFL);
+    mom2 = mom + n * (x - HFL / 2);
+    Ine =
+      (BFL * HFL ** 3) / 3 -
+      BFL * HFL * x ** 2 +
+      AEF * Ast * (d ** 2 - x ** 2) +
+      AEF * Asc * (GCF ** 2 - x ** 2);
 
-    sigs = -Math.abs(AEF * (n / (BFL * HFL + AEF * Ast + AEF * Asc) - mom2 * (HFL - x - GTF) / Ine))
-  }
-  else if (n < 0 && (mom / n >= -(HFL / 2 - GCF) && mom / n <= (HFL / 2 - GTF))) {
+    sigs = -Math.abs(
+      AEF *
+        (n / (BFL * HFL + AEF * Ast + AEF * Asc) -
+          (mom2 * (HFL - x - GTF)) / Ine)
+    );
+  } else if (n < 0 && mom / n >= -(HFL / 2 - GCF) && mom / n <= HFL / 2 - GTF) {
     // section entièrement tendue
 
     if (Asc == 0) {
-      throw "Section entièrement tendue, donner une valeur de Asc"
+      throw 'Section entièrement tendue, donner une valeur de Asc';
     } else {
-      ce = HFL / 2 - mom / n
-      sigs = Math.abs(n * (ce - GCF) / ((d - GCF) * Ast))
+      ce = HFL / 2 - mom / n;
+      sigs = Math.abs((n * (ce - GCF)) / ((d - GCF) * Ast));
     }
   } else {
     // section partiellement comprimée
 
-    ce = HFL / 2 - mom / n
-    p = -3 * ce ** 2 + 6 * AEF * Ast / BFL * (d - ce) + 6 * AEF * Asc / BFL * (GCF - ce)
-    q = -2 * ce ** 3 - 6 * AEF * Ast / BFL * (d - ce) ** 2 - 6 * AEF * Asc / BFL * (GCF - ce) ** 2
+    ce = HFL / 2 - mom / n;
+    p =
+      -3 * ce ** 2 +
+      ((6 * AEF * Ast) / BFL) * (d - ce) +
+      ((6 * AEF * Asc) / BFL) * (GCF - ce);
+    q =
+      -2 * ce ** 3 -
+      ((6 * AEF * Ast) / BFL) * (d - ce) ** 2 -
+      ((6 * AEF * Asc) / BFL) * (GCF - ce) ** 2;
 
-    y = equ3(1, 0, p, q, HFL, ce)
+    y = equ3(1, 0, p, q, HFL, ce);
 
-    x = y + ce
-    sigc = n * x / (0.5 * BFL * (x ** 2) - AEF * Ast * (d - x) - AEF * Asc * (GCF - x))
-    sigs = AEF * sigc * (d - x) / x
+    x = y + ce;
+    sigc =
+      (n * x) /
+      (0.5 * BFL * x ** 2 - AEF * Ast * (d - x) - AEF * Asc * (GCF - x));
+    sigs = (AEF * sigc * (d - x)) / x;
   }
 
   return sigs;
@@ -1710,13 +1861,11 @@ export function getSigmaS2(
   GCF: number,
   GTF: number,
   n: number,
-  mom: number,
+  mom: number
 ) {
-
   let sigs2: number;
 
-  let
-    x: number,
+  let x: number,
     sigc: number,
     ce: number,
     p: number,
@@ -1726,51 +1875,78 @@ export function getSigmaS2(
     mom2: number,
     Ine: number;
 
-  vc = (GCF * AEF * Asc + HFL / 2 * BFL * HFL + d * AEF * Ast) / (AEF * Asc + AEF * Ast + BFL * HFL)
+  vc =
+    (GCF * AEF * Asc + (HFL / 2) * BFL * HFL + d * AEF * Ast) /
+    (AEF * Asc + AEF * Ast + BFL * HFL);
 
   if (n == 0) {
     // flexion simple
 
-    x = equ2(BFL / 2, AEF * Asc + AEF * Ast, -AEF * GCF * Asc - AEF * d * Ast, HFL)
-    Ine = BFL * x * x * x / 3 + AEF * Ast * (d - x) * (d - x) + AEF * (x - GCF) ** 2 * Asc
+    x = equ2(
+      BFL / 2,
+      AEF * Asc + AEF * Ast,
+      -AEF * GCF * Asc - AEF * d * Ast,
+      HFL
+    );
+    Ine =
+      (BFL * x * x * x) / 3 +
+      AEF * Ast * (d - x) * (d - x) +
+      AEF * (x - GCF) ** 2 * Asc;
 
-    sigs2 = AEF * mom * (x - GCF) / Ine
-  }
-  else if (n > 0 && mom / n - (HFL / 2 - vc) <= HFL / 6 && mom / n - (HFL / 2 - vc) >= -HFL / 6) {
+    sigs2 = (AEF * mom * (x - GCF)) / Ine;
+  } else if (
+    n > 0 &&
+    mom / n - (HFL / 2 - vc) <= HFL / 6 &&
+    mom / n - (HFL / 2 - vc) >= -HFL / 6
+  ) {
     // section entierement comprimée
 
-    x = (AEF * Ast * d + AEF * Asc * GCF + BFL * HFL * HFL / 2) / (AEF * Ast + AEF * Asc + BFL * HFL)
-    mom2 = mom + n * (x - HFL / 2)
-    Ine = BFL * HFL ** 3 / 3 - BFL * HFL * x ** 2 + AEF * Ast * (d ** 2 - x ** 2) + AEF * Asc * (GCF ** 2 - x ** 2)
+    x =
+      (AEF * Ast * d + AEF * Asc * GCF + (BFL * HFL * HFL) / 2) /
+      (AEF * Ast + AEF * Asc + BFL * HFL);
+    mom2 = mom + n * (x - HFL / 2);
+    Ine =
+      (BFL * HFL ** 3) / 3 -
+      BFL * HFL * x ** 2 +
+      AEF * Ast * (d ** 2 - x ** 2) +
+      AEF * Asc * (GCF ** 2 - x ** 2);
 
-    sigs2 = -Math.abs(AEF * (n / (BFL * HFL + AEF * Ast + AEF * Asc) + mom2 * (x - GCF) / Ine))
-  }
-  else if (n < 0 && (mom / n >= -(HFL / 2 - GCF) && mom / n <= (HFL / 2 - GTF))) {
+    sigs2 = -Math.abs(
+      AEF * (n / (BFL * HFL + AEF * Ast + AEF * Asc) + (mom2 * (x - GCF)) / Ine)
+    );
+  } else if (n < 0 && mom / n >= -(HFL / 2 - GCF) && mom / n <= HFL / 2 - GTF) {
     // section entièrement tendue
-    x = 0
+    x = 0;
     if (Asc == 0) {
-      throw "Section entièrement tendue, donner une valeur de Asc"
+      throw 'Section entièrement tendue, donner une valeur de Asc';
     } else {
-
-      ce = HFL / 2 - mom / n
-      sigs2 = Math.abs(n * (d - ce) / ((d - GCF) * Asc))
+      ce = HFL / 2 - mom / n;
+      sigs2 = Math.abs((n * (d - ce)) / ((d - GCF) * Asc));
     }
   } else {
     // section partiellement comprimée
 
-    ce = HFL / 2 - mom / n
-    p = -3 * ce ** 2 + 6 * AEF * Ast / BFL * (d - ce) + 6 * AEF * Asc / BFL * (GCF - ce)
-    q = -2 * ce ** 3 - 6 * AEF * Ast / BFL * (d - ce) ** 2 - 6 * AEF * Asc / BFL * (GCF - ce) ** 2
+    ce = HFL / 2 - mom / n;
+    p =
+      -3 * ce ** 2 +
+      ((6 * AEF * Ast) / BFL) * (d - ce) +
+      ((6 * AEF * Asc) / BFL) * (GCF - ce);
+    q =
+      -2 * ce ** 3 -
+      ((6 * AEF * Ast) / BFL) * (d - ce) ** 2 -
+      ((6 * AEF * Asc) / BFL) * (GCF - ce) ** 2;
 
-    y = equ3(1, 0, p, q, HFL, ce)
+    y = equ3(1, 0, p, q, HFL, ce);
 
-    x = y + ce
-    sigc = n * x / (0.5 * BFL * (x ** 2) - AEF * Ast * (d - x) - AEF * Asc * (GCF - x))
+    x = y + ce;
+    sigc =
+      (n * x) /
+      (0.5 * BFL * x ** 2 - AEF * Ast * (d - x) - AEF * Asc * (GCF - x));
 
     if (Asc == 0) {
-      sigs2 = 0
+      sigs2 = 0;
     } else {
-      sigs2 = -AEF * sigc * (x - GCF) / x
+      sigs2 = (-AEF * sigc * (x - GCF)) / x;
     }
   }
 
@@ -1783,7 +1959,13 @@ export function getSigmaS2(
  * @returns (1/100/1000/NaN) resp. for (MN/T/KN/...)
  */
 export function getSmallKUnit(UNIT: EnumUNIT) {
-  return UNIT == EnumUNIT.KN ? 1000 : (UNIT == EnumUNIT.T) ? 100 : (UNIT == EnumUNIT.MN) ? 1 : NaN;
+  return UNIT == EnumUNIT.KN
+    ? 1000
+    : UNIT == EnumUNIT.T
+    ? 100
+    : UNIT == EnumUNIT.MN
+    ? 1
+    : NaN;
 }
 
 /**
@@ -1812,16 +1994,15 @@ export function contraintesELS(
   GCF: number,
   GTF: number,
   ns: number,
-  ms: number,
+  ms: number
 ): ElsParams {
-
   let result: ElsParams = {
     k2: NaN,
     sigc: NaN,
     sigct: NaN,
     sigs: NaN,
     sigs2: NaN,
-    x: NaN
+    x: NaN,
   };
 
   let ce: number,
@@ -1837,93 +2018,150 @@ export function contraintesELS(
     mom2: number,
     Ine: number;
 
-  vc = (GCF * AEF * Asc + HFL / 2 * BFL * HFL + d * AEF * Ast) / (AEF * Asc + AEF * Ast + BFL * HFL)
+  vc =
+    (GCF * AEF * Asc + (HFL / 2) * BFL * HFL + d * AEF * Ast) /
+    (AEF * Asc + AEF * Ast + BFL * HFL);
   // vt = (_GCF * _AEF * Asc + d * _AEF * Ast) / (_AEF * Asc + _AEF * Ast)
 
   if (ns == 0) {
     // flexion simple
 
-    result.x = equ2(BFL / 2, AEF * Asc + AEF * Ast, -AEF * GCF * Asc - AEF * d * Ast, HFL)
-    Ine = BFL * result.x * result.x * result.x / 3 + AEF * Ast * (d - result.x) * (d - result.x) + AEF * (result.x - GCF) ** 2 * Asc
-    result.sigc = ms * result.x / Ine
+    result.x = equ2(
+      BFL / 2,
+      AEF * Asc + AEF * Ast,
+      -AEF * GCF * Asc - AEF * d * Ast,
+      HFL
+    );
+    Ine =
+      (BFL * result.x * result.x * result.x) / 3 +
+      AEF * Ast * (d - result.x) * (d - result.x) +
+      AEF * (result.x - GCF) ** 2 * Asc;
+    result.sigc = (ms * result.x) / Ine;
     if (result.sigc < 0) {
-      result.sigc = 0
+      result.sigc = 0;
     }
 
-    result.sigs = AEF * ms * (d - result.x) / Ine
-    result.sigs2 = AEF * ms * (result.x - GCF) / Ine
+    result.sigs = (AEF * ms * (d - result.x)) / Ine;
+    result.sigs2 = (AEF * ms * (result.x - GCF)) / Ine;
 
-    result.k2 = 0.5
+    result.k2 = 0.5;
 
     // calcul de sigct
-    sh = BFL * HFL + Asc * AEF + Ast * AEF
-    yg = (GCF * Asc * AEF + BFL * HFL ** 2 / 2 + d * Ast * AEF) / sh
-    ig = BFL * HFL ** 3 / 3 + GCF ** 2 * Asc * AEF + d ** 2 * Ast * AEF - yg ** 2 * sh
+    sh = BFL * HFL + Asc * AEF + Ast * AEF;
+    yg = (GCF * Asc * AEF + (BFL * HFL ** 2) / 2 + d * Ast * AEF) / sh;
+    ig =
+      (BFL * HFL ** 3) / 3 +
+      GCF ** 2 * Asc * AEF +
+      d ** 2 * Ast * AEF -
+      yg ** 2 * sh;
     //result.sigct = -ns / sh + ms / ig * (HFL - yg)
-
-  }
-  else if (ns > 0 && ms / ns - (HFL / 2 - vc) <= HFL / 6 && ms / ns - (HFL / 2 - vc) >= -HFL / 6) {
+  } else if (
+    ns > 0 &&
+    ms / ns - (HFL / 2 - vc) <= HFL / 6 &&
+    ms / ns - (HFL / 2 - vc) >= -HFL / 6
+  ) {
     // section entierement comprimée
 
-    result.x = (AEF * Ast * d + AEF * Asc * GCF + BFL * HFL * HFL / 2) / (AEF * Ast + AEF * Asc + BFL * HFL)
-    mom2 = ms + ns * (result.x - HFL / 2)
-    Ine = BFL * HFL ** 3 / 3 - BFL * HFL * result.x ** 2 + AEF * Ast * (d ** 2 - result.x ** 2) + AEF * Asc * (GCF ** 2 - result.x ** 2)
-    result.sigc = Math.max(Math.abs(ns / (BFL * HFL + AEF * Ast + AEF * Asc) + mom2 * result.x / Ine), Math.abs(ns / (BFL * HFL + AEF * Ast + AEF * Asc) - mom2 * (HFL - result.x) / Ine))
+    result.x =
+      (AEF * Ast * d + AEF * Asc * GCF + (BFL * HFL * HFL) / 2) /
+      (AEF * Ast + AEF * Asc + BFL * HFL);
+    mom2 = ms + ns * (result.x - HFL / 2);
+    Ine =
+      (BFL * HFL ** 3) / 3 -
+      BFL * HFL * result.x ** 2 +
+      AEF * Ast * (d ** 2 - result.x ** 2) +
+      AEF * Asc * (GCF ** 2 - result.x ** 2);
+    result.sigc = Math.max(
+      Math.abs(
+        ns / (BFL * HFL + AEF * Ast + AEF * Asc) + (mom2 * result.x) / Ine
+      ),
+      Math.abs(
+        ns / (BFL * HFL + AEF * Ast + AEF * Asc) -
+          (mom2 * (HFL - result.x)) / Ine
+      )
+    );
 
-    result.sigs = -Math.abs(AEF * (ns / (BFL * HFL + AEF * Ast + AEF * Asc) - mom2 * (HFL - result.x - GTF) / Ine))
-    result.sigs2 = -Math.abs(AEF * (ns / (BFL * HFL + AEF * Ast + AEF * Asc) + mom2 * (result.x - GCF) / Ine))
+    result.sigs = -Math.abs(
+      AEF *
+        (ns / (BFL * HFL + AEF * Ast + AEF * Asc) -
+          (mom2 * (HFL - result.x - GTF)) / Ine)
+    );
+    result.sigs2 = -Math.abs(
+      AEF *
+        (ns / (BFL * HFL + AEF * Ast + AEF * Asc) +
+          (mom2 * (result.x - GCF)) / Ine)
+    );
 
-    result.k2 = 0
+    result.k2 = 0;
     //result.sigct = 0
-  }
-  else if (ns < 0 && (ms / ns >= -(HFL / 2 - GCF) && ms / ns <= (HFL / 2 - GTF))) {
+  } else if (
+    ns < 0 &&
+    ms / ns >= -(HFL / 2 - GCF) &&
+    ms / ns <= HFL / 2 - GTF
+  ) {
     // section entièrement tendue
-    result.x = 0
+    result.x = 0;
     if (Asc == 0) {
-      throw "Section entièrement tendue, donner une valeur de Asc"
+      throw 'Section entièrement tendue, donner une valeur de Asc';
     } else {
-
-      ce = HFL / 2 - ms / ns
-      result.sigs2 = Math.abs(ns * (d - ce) / ((d - GCF) * Asc))
-      result.sigc = 0
-      result.sigs = Math.abs(ns * (ce - GCF) / ((d - GCF) * Ast))
+      ce = HFL / 2 - ms / ns;
+      result.sigs2 = Math.abs((ns * (d - ce)) / ((d - GCF) * Asc));
+      result.sigc = 0;
+      result.sigs = Math.abs((ns * (ce - GCF)) / ((d - GCF) * Ast));
       //r.sigct = (((n * (ce - GCF) / ((d - GCF) * Ast)) - (n * (d - ce) / ((d - GCF) * Asc))) / (HFL - GCF) + (n * (d - ce) / ((d - GCF) * Asc))) / AEF
     }
 
-    eps1 = Math.max(result.sigs, result.sigs2)
-    eps2 = Math.min(result.sigs, result.sigs2)
-    result.k2 = (eps1 + eps2) / (2 * eps1)
+    eps1 = Math.max(result.sigs, result.sigs2);
+    eps2 = Math.min(result.sigs, result.sigs2);
+    result.k2 = (eps1 + eps2) / (2 * eps1);
 
     // calcul de sigct
-    sh = BFL * HFL + Asc * AEF + Ast * AEF
-    yg = (GCF * Asc * AEF + BFL * HFL ** 2 / 2 + d * Ast * AEF) / sh
-    ig = BFL * HFL ** 3 / 3 + GCF ** 2 * Asc * AEF + d ** 2 * Ast * AEF - yg ** 2 * sh
+    sh = BFL * HFL + Asc * AEF + Ast * AEF;
+    yg = (GCF * Asc * AEF + (BFL * HFL ** 2) / 2 + d * Ast * AEF) / sh;
+    ig =
+      (BFL * HFL ** 3) / 3 +
+      GCF ** 2 * Asc * AEF +
+      d ** 2 * Ast * AEF -
+      yg ** 2 * sh;
     //result.sigct = (-ns / sh + ms / ig * (HFL - yg))
-
   } else {
     // section partiellement comprimée
 
-    ce = HFL / 2 - ms / ns
-    p = -3 * ce ** 2 + 6 * AEF * Ast / BFL * (d - ce) + 6 * AEF * Asc / BFL * (GCF - ce)
-    q = -2 * ce ** 3 - 6 * AEF * Ast / BFL * (d - ce) ** 2 - 6 * AEF * Asc / BFL * (GCF - ce) ** 2
+    ce = HFL / 2 - ms / ns;
+    p =
+      -3 * ce ** 2 +
+      ((6 * AEF * Ast) / BFL) * (d - ce) +
+      ((6 * AEF * Asc) / BFL) * (GCF - ce);
+    q =
+      -2 * ce ** 3 -
+      ((6 * AEF * Ast) / BFL) * (d - ce) ** 2 -
+      ((6 * AEF * Asc) / BFL) * (GCF - ce) ** 2;
 
-    y = equ3(1, 0, p, q, HFL, ce)
+    y = equ3(1, 0, p, q, HFL, ce);
 
-    result.x = y + ce
-    result.sigc = ns * result.x / (0.5 * BFL * (result.x ** 2) - AEF * Ast * (d - result.x) - AEF * Asc * (GCF - result.x))
-    result.sigs = AEF * result.sigc * (d - result.x) / result.x
+    result.x = y + ce;
+    result.sigc =
+      (ns * result.x) /
+      (0.5 * BFL * result.x ** 2 -
+        AEF * Ast * (d - result.x) -
+        AEF * Asc * (GCF - result.x));
+    result.sigs = (AEF * result.sigc * (d - result.x)) / result.x;
     if (Asc == 0) {
-      result.sigs2 = 0
+      result.sigs2 = 0;
     } else {
-      result.sigs2 = -AEF * result.sigc * (result.x - GCF) / result.x
+      result.sigs2 = (-AEF * result.sigc * (result.x - GCF)) / result.x;
     }
 
-    result.k2 = 0.5
+    result.k2 = 0.5;
 
     // calcul de sigct
-    sh = BFL * HFL + Asc * AEF + Ast * AEF
-    yg = (GCF * Asc * AEF + BFL * HFL ** 2 / 2 + d * Ast * AEF) / sh
-    ig = BFL * HFL ** 3 / 3 + GCF ** 2 * Asc * AEF + d ** 2 * Ast * AEF - yg ** 2 * sh
+    sh = BFL * HFL + Asc * AEF + Ast * AEF;
+    yg = (GCF * Asc * AEF + (BFL * HFL ** 2) / 2 + d * Ast * AEF) / sh;
+    ig =
+      (BFL * HFL ** 3) / 3 +
+      GCF ** 2 * Asc * AEF +
+      d ** 2 * Ast * AEF -
+      yg ** 2 * sh;
     //result.sigct = (-ns / sh + ms / ig * (HFL - yg))
   }
 
@@ -1964,42 +2202,55 @@ export function getBendingX(
   GCF: number,
   GTF: number,
   ns: number,
-  ms: number,
+  ms: number
 ): number {
+  let x = NaN;
 
-  let x = NaN
+  let ce: number, p: number, q: number, y: number, vc: number;
 
-  let ce: number,
-    p: number,
-    q: number,
-    y: number,
-    vc: number
-
-  vc = (GCF * AEF * Asc + HFL / 2 * BFL * HFL + d * AEF * Ast) / (AEF * Asc + AEF * Ast + BFL * HFL)
+  vc =
+    (GCF * AEF * Asc + (HFL / 2) * BFL * HFL + d * AEF * Ast) /
+    (AEF * Asc + AEF * Ast + BFL * HFL);
 
   if (ns == 0) {
     // flexion simple
-    x = equ2(BFL / 2, AEF * Asc + AEF * Ast, -AEF * GCF * Asc - AEF * d * Ast, HFL)
-
-  }
-  else if (ns > 0 && ms / ns - (HFL / 2 - vc) <= HFL / 6 && ms / ns - (HFL / 2 - vc) >= -HFL / 6) {
+    x = equ2(
+      BFL / 2,
+      AEF * Asc + AEF * Ast,
+      -AEF * GCF * Asc - AEF * d * Ast,
+      HFL
+    );
+  } else if (
+    ns > 0 &&
+    ms / ns - (HFL / 2 - vc) <= HFL / 6 &&
+    ms / ns - (HFL / 2 - vc) >= -HFL / 6
+  ) {
     // section entierement comprimée
-    x = (AEF * Ast * d + AEF * Asc * GCF + BFL * HFL * HFL / 2) / (AEF * Ast + AEF * Asc + BFL * HFL)
-
-  }
-  else if (ns < 0 && (ms / ns >= -(HFL / 2 - GCF) && ms / ns <= (HFL / 2 - GTF))) {
+    x =
+      (AEF * Ast * d + AEF * Asc * GCF + (BFL * HFL * HFL) / 2) /
+      (AEF * Ast + AEF * Asc + BFL * HFL);
+  } else if (
+    ns < 0 &&
+    ms / ns >= -(HFL / 2 - GCF) &&
+    ms / ns <= HFL / 2 - GTF
+  ) {
     // section entièrement tendue
-    x = 0
-
+    x = 0;
   } else {
     // section partiellement comprimée
 
-    ce = HFL / 2 - ms / ns
-    p = -3 * ce ** 2 + 6 * AEF * Ast / BFL * (d - ce) + 6 * AEF * Asc / BFL * (GCF - ce)
-    q = -2 * ce ** 3 - 6 * AEF * Ast / BFL * (d - ce) ** 2 - 6 * AEF * Asc / BFL * (GCF - ce) ** 2
-    y = equ3(1, 0, p, q, HFL, ce)
+    ce = HFL / 2 - ms / ns;
+    p =
+      -3 * ce ** 2 +
+      ((6 * AEF * Ast) / BFL) * (d - ce) +
+      ((6 * AEF * Asc) / BFL) * (GCF - ce);
+    q =
+      -2 * ce ** 3 -
+      ((6 * AEF * Ast) / BFL) * (d - ce) ** 2 -
+      ((6 * AEF * Asc) / BFL) * (GCF - ce) ** 2;
+    y = equ3(1, 0, p, q, HFL, ce);
 
-    x = y + ce
+    x = y + ce;
   }
 
   return x;
@@ -2021,7 +2272,8 @@ export function simpson1(
   para: number,
   d: number,
   dzeta: number,
-  n: number) {
+  n: number
+) {
   // let i: number, j: number
   // 'j = 0
   // 'simpson1 = 0
@@ -2031,7 +2283,16 @@ export function simpson1(
   // 'Next i
 
   // Moment résistant béton par rapport à axe armatures tendu
-  return (z1 + ec2 / (para * (n + 1)) * (Math.abs(1 - z1 * para / ec2)) ** (n + 1)) * (z1 + d - dzeta * d) - ec2 / (para * (n + 1)) * (d - dzeta * d) - z1 ** 2 / 2 - ec2 ** 2 / (para ** 2 * (n + 1) * (n + 2)) * (Math.abs(1 - z1 * para / ec2)) ** (n + 2) - ec2 ** 2 / (para ** 2 * (n + 1) * (n + 2))
+  return (
+    (z1 +
+      (ec2 / (para * (n + 1))) * Math.abs(1 - (z1 * para) / ec2) ** (n + 1)) *
+      (z1 + d - dzeta * d) -
+    (ec2 / (para * (n + 1))) * (d - dzeta * d) -
+    z1 ** 2 / 2 -
+    (ec2 ** 2 / (para ** 2 * (n + 1) * (n + 2))) *
+      Math.abs(1 - (z1 * para) / ec2) ** (n + 2) -
+    ec2 ** 2 / (para ** 2 * (n + 1) * (n + 2))
+  );
 }
 
 /**
@@ -2043,11 +2304,7 @@ export function simpson1(
  * @param n
  * @returns
  */
-export function simpson2(
-  z1: number,
-  ec2: number,
-  para: number,
-  n: number) {
+export function simpson2(z1: number, ec2: number, para: number, n: number) {
   // let i: number, j: number
   // 'j = 0
   // 'simpson2 = 0
@@ -2057,7 +2314,11 @@ export function simpson2(
   // 'Next i
 
   // Effort normal résistant béton
-  return z1 + ec2 / (para * (n + 1)) * (Math.abs(1 - z1 * para / ec2)) ** (n + 1) - ec2 / (para * (n + 1))
+  return (
+    z1 +
+    (ec2 / (para * (n + 1))) * Math.abs(1 - (z1 * para) / ec2) ** (n + 1) -
+    ec2 / (para * (n + 1))
+  );
 }
 
 /**
@@ -2074,8 +2335,12 @@ export function getIntegrale(
   para: number,
   d: number,
   dzeta: number,
-  N: number): number {
-  return simpson1(EC2 / para, EC2, para, d, dzeta, N) + (dzeta * d - EC2 / para) * (d - (dzeta * d - EC2 / para) / 2);
+  N: number
+): number {
+  return (
+    simpson1(EC2 / para, EC2, para, d, dzeta, N) +
+    (dzeta * d - EC2 / para) * (d - (dzeta * d - EC2 / para) / 2)
+  );
 }
 
 /**
@@ -2092,8 +2357,8 @@ export function getIntegrale2(
   para: number,
   d: number,
   dzeta: number,
-  N: number): number {
-
+  N: number
+): number {
   return simpson2(EC2 / para, EC2, para, N) + (dzeta * d - EC2 / para);
 }
 
@@ -2103,34 +2368,44 @@ export function getIntegrale2(
  * @param params object, with keys the param names, and values as param values to replace in template
  * @returns ParamString object used by the translator
  */
-export function toParamString(template: string, params: Object | undefined): ParamString {
+export function toParamString(
+  template: string,
+  params: Object | undefined
+): ParamString {
   return {
     text: template,
-    params: params
-  }
+    params: params,
+  };
 }
 
 export function toFixedTrimmed(n: number, fractionDigits?: number | undefined) {
-  return parseFloat(n.toFixed(fractionDigits))
+  return parseFloat(n.toFixed(fractionDigits));
 }
-
 
 /** Array used by getAutoAsc(t)Array functions */
 const TabdiaBauto = [0, 6, 8, 10, 12, 14, 16, 20, 25, 32, 40];
 
 /**
  * Get the Ast Array when the BAUTO is activated (Flexion/Bending tab)
- * @param HFL 
- * @param BFL  
- * @param AST1 
+ * @param HFL
+ * @param BFL
+ * @param AST1
  * @returns Array [
  * [NAST1, LAST1],
  * [NAST2, LAST2],
  * [NAST3, LAST3]
  * ]
  */
-export function getAutoAstArray(HFL: number, BFL: number, AST1: number): number[][] {
-  let asts = [[0, 0], [0, 0], [0, 0]];
+export function getAutoAstArray(
+  HFL: number,
+  BFL: number,
+  AST1: number
+): number[][] {
+  let asts = [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ];
   let Ast = AST1 / 10000;
 
   const diamax = Math.min(Math.floor(HFL * 100), 40); //40
@@ -2150,34 +2425,38 @@ export function getAutoAstArray(HFL: number, BFL: number, AST1: number): number[
     if (TabdiaBauto[i] >= diamax) {
       j++;
     }
-    aire = Math.PI * ((TabdiaBauto[i] * 0.001) ** 2) * nb / 4 * j;
+    aire = ((Math.PI * (TabdiaBauto[i] * 0.001) ** 2 * nb) / 4) * j;
 
     // [NAST1, LAST1]
     asts[0] = [nb * j, TabdiaBauto[i]];
-
   } while (aire < Ast);
 
   return asts;
 }
 
-
 /**
  * Get the Asc Array when the BAUTO is activated (Flexion/Bending tab)
- * @param HFL 
- * @param BFL 
- * @param ASC1 
+ * @param HFL
+ * @param BFL
+ * @param ASC1
  * @returns Array [
  * [NASC1, LASC1],
  * [NASC2, LASC2],
  * [NASC3, LASC3]
  * ]
  */
-export function getAutoAscArray(HFL: number, BFL: number, ASC1: number): number[][] {
+export function getAutoAscArray(
+  HFL: number,
+  BFL: number,
+  ASC1: number
+): number[][] {
+  let ascs = [
+    [0, 0],
+    [0, 0],
+    [0, 0],
+  ];
 
-  let ascs = [[0, 0], [0, 0], [0, 0]];
-
-  if (ASC1 == 0)
-    return ascs;
+  if (ASC1 == 0) return ascs;
 
   let Asc = ASC1 / 10000;
 
@@ -2198,7 +2477,7 @@ export function getAutoAscArray(HFL: number, BFL: number, ASC1: number): number[
     if (TabdiaBauto[i] >= diamax) {
       j++;
     }
-    aire = Math.PI * ((TabdiaBauto[i] * 0.001) ** 2) * nb / 4 * j;
+    aire = ((Math.PI * (TabdiaBauto[i] * 0.001) ** 2 * nb) / 4) * j;
 
     ascs[0] = [nb * j, TabdiaBauto[i]];
   } while (aire < Math.abs(Asc));
@@ -2215,13 +2494,13 @@ export function getAutoAscArray(HFL: number, BFL: number, ASC1: number): number[
  * Onglet: ShearForce/EffortTranchant/Torsion
  * Champ: I24/H11(Torsion)
  * C'est le meme calcul que alpha_cw de Torsion, avec param differents
- * @param STA 
- * @param KUNIT 
- * @param BFL 
- * @param HFL 
- * @param FCTM 
- * @param ned 
- * @returns 
+ * @param STA
+ * @param KUNIT
+ * @param BFL
+ * @param HFL
+ * @param FCTM
+ * @param ned
+ * @returns
  */
 export function getAcw(
   STA: EnumSTA,
@@ -2229,10 +2508,10 @@ export function getAcw(
   BFL: number,
   HFL: number,
   FCTM: number,
-  ned: number,
+  ned: number
 ): number {
   if (BFL == 0 || HFL == 0) {
-    throw "b ou h ne peuvent être à 0";
+    throw 'b ou h ne peuvent être à 0';
     //return 1;
   }
   let ac = BFL * HFL;
@@ -2249,37 +2528,42 @@ export function getAcw(
     case EnumSTA.NF_EN_1992_1_1_NA:
     case EnumSTA.NF_EN_1992_2_NA:
     case EnumSTA.NF_EN_1992_3_NA:
-      if (ned * 0.000001 * KUNIT / ac < 0 && ned * 0.000001 * KUNIT / ac <= -FCTM) {
+      if (
+        (ned * 0.000001 * KUNIT) / ac < 0 &&
+        (ned * 0.000001 * KUNIT) / ac <= -FCTM
+      ) {
         throw "Sigct > fctm  Erreur, ce cas n'est pas traité dans la NF EN 1992-1-1/NA ";
       }
-      if (ned * 0.000001 * KUNIT / ac < 0) {
-        return 1 + ned * 0.000001 * KUNIT / ac / FCTM;
+      if ((ned * 0.000001 * KUNIT) / ac < 0) {
+        return 1 + (ned * 0.000001 * KUNIT) / ac / FCTM;
       } else {
         return 1;
       }
   }
 }
 
-export function isHidden(propertyCode: PropertyCode, propertyValues: Record<PropertyCode, any>): boolean {
+export function isHidden(
+  propertyCode: PropertyCode,
+  propertyValues: Record<PropertyCode, any>
+): boolean {
   const STA = propertyValues[PropertyCode.STA];
 
   switch (propertyCode) {
-
     // Concrete carac. / Carac béton
     case PropertyCode.F0C:
     case PropertyCode.BCTT0:
       switch (STA) {
         case EnumSTA.EN1992_2_BS:
         case EnumSTA.NF_EN_1992_2_NA:
-          const FCK: number = propertyValues[PropertyCode.FCK]
-          const TSE: boolean = propertyValues[PropertyCode.TSE]
-          return (TSE || FCK >= 55)
+          const FCK: number = propertyValues[PropertyCode.FCK];
+          const TSE: boolean = propertyValues[PropertyCode.TSE];
+          return TSE || FCK >= 55;
 
         case EnumSTA.RCC_CW_2018:
-          return true
+          return true;
 
         default:
-          return false
+          return false;
       }
 
     case PropertyCode.FBTT0:
@@ -2287,25 +2571,29 @@ export function isHidden(propertyCode: PropertyCode, propertyValues: Record<Prop
       switch (STA) {
         case EnumSTA.EN1992_2_BS:
         case EnumSTA.NF_EN_1992_2_NA:
-          const FCK: number = propertyValues[PropertyCode.FCK]
-          const TSE: boolean = propertyValues[PropertyCode.TSE]
-          return !(FCK >= 55 || TSE)
+          const FCK: number = propertyValues[PropertyCode.FCK];
+          const TSE: boolean = propertyValues[PropertyCode.TSE];
+          return !(FCK >= 55 || TSE);
 
         case EnumSTA.RCC_CW_2018:
-          return false
+          return false;
 
         default:
-          return true
+          return true;
       }
 
     case PropertyCode.SFC:
     case PropertyCode.TSE:
-      return !(STA === EnumSTA.EN1992_2_BS || STA === EnumSTA.NF_EN_1992_2_NA || STA === EnumSTA.RCC_CW_2018);
+      return !(
+        STA === EnumSTA.EN1992_2_BS ||
+        STA === EnumSTA.NF_EN_1992_2_NA ||
+        STA === EnumSTA.RCC_CW_2018
+      );
 
     // Deflexion / Flèche
     case PropertyCode.AM0D:
       const ENT = propertyValues[PropertyCode.ENT];
-      return (ENT !== EnumENT.LOADS);
+      return ENT !== EnumENT.LOADS;
 
     case PropertyCode.TACFL:
       const LIFE = propertyValues[PropertyCode.LIFE];
@@ -2327,25 +2615,25 @@ export function isHidden(propertyCode: PropertyCode, propertyValues: Record<Prop
 
     case PropertyCode.CBAR:
       const HCOC = propertyValues[PropertyCode.HCOC];
-      return (STA === EnumSTA.NF_EN_1992_2_NA && HCOC);
+      return STA === EnumSTA.NF_EN_1992_2_NA && HCOC;
 
     case PropertyCode.ASTF:
     case PropertyCode.ASCF:
     case PropertyCode.HCOC:
-      return (STA !== EnumSTA.NF_EN_1992_2_NA);
+      return STA !== EnumSTA.NF_EN_1992_2_NA;
 
     case PropertyCode.QCF:
-      return (STA !== EnumSTA.RCC_CW_2018);
+      return STA !== EnumSTA.RCC_CW_2018;
 
     case PropertyCode.QCC:
       switch (STA) {
         case EnumSTA.EN1992_2_BS:
         case EnumSTA.NF_EN_1992_2_NA:
         case EnumSTA.NF_EN_1992_3_NA:
-          return true
+          return true;
 
         default:
-          return false
+          return false;
       }
 
     // Shear Force / Effort Tranchant
@@ -2358,21 +2646,22 @@ export function isHidden(propertyCode: PropertyCode, propertyValues: Record<Prop
     case PropertyCode.VRDI:
     case PropertyCode.CDY:
     case PropertyCode.CDY_INFO:
-      return (STA === EnumSTA.RCC_CW_2018);
+      return STA === EnumSTA.RCC_CW_2018;
 
     case PropertyCode.SSAS: {
       let visible = true;
       if (STA === EnumSTA.RCC_CW_2018) {
         return !visible;
-      }
-      else {
+      } else {
         const VEDI = propertyValues[PropertyCode.VEDI];
         const VRDI = propertyValues[PropertyCode.VRDI];
         const FCK = propertyValues[PropertyCode.FCK];
         const ACC = propertyValues[PropertyCode.ACC];
         const GACF = propertyValues[PropertyCode.GACF];
-        visible = (VEDI >= VRDI) && ((0.5 * (0.6 * (1 - FCK / 250)) * (ACC * FCK / GACF)) >= VEDI)
-        return !visible
+        visible =
+          VEDI >= VRDI &&
+          0.5 * (0.6 * (1 - FCK / 250)) * ((ACC * FCK) / GACF) >= VEDI;
+        return !visible;
       }
     }
 
@@ -2386,7 +2675,7 @@ export function isHidden(propertyCode: PropertyCode, propertyValues: Record<Prop
     case PropertyCode.VRDMY:
     case PropertyCode.VRDCY:
       const VEDY = propertyValues[PropertyCode.VEDY];
-      return (VEDY === 0);
+      return VEDY === 0;
 
     // Corbels / Console
     case PropertyCode.SFS:
@@ -2405,19 +2694,19 @@ export function isHidden(propertyCode: PropertyCode, propertyValues: Record<Prop
  * VRd,max (t)
  * Value ex: VRd,max =	25.17	t
  * Excel: EffortTranchant.I32
- * @param STA 
- * @param KUNIT 
- * @param BFL 
- * @param HFL 
- * @param GTF 
- * @param ACW 
- * @param str 
- * @param SRSF 
- * @param NEDSF 
- * @param GACF 
- * @param FCK 
- * @param ACC 
- * @param FCTM 
+ * @param STA
+ * @param KUNIT
+ * @param BFL
+ * @param HFL
+ * @param GTF
+ * @param ACW
+ * @param str
+ * @param SRSF
+ * @param NEDSF
+ * @param GACF
+ * @param FCK
+ * @param ACC
+ * @param FCTM
  * @returns VRd,max (t); ex: 25.17
  */
 export async function getBasicVRDM(
@@ -2433,16 +2722,26 @@ export async function getBasicVRDM(
   GACF: number,
   FCK: number,
   ACC: number,
-  FCTM: number,
+  FCTM: number
 ): Promise<number> {
-
   let d = HFL - GTF;
   let z = 0.9 * d;
 
-  let teta = await getTeta(STA, KUNIT, str, NEDSF, BFL, HFL, FCTM, ACC, FCK, GACF);
+  let teta = await getTeta(
+    STA,
+    KUNIT,
+    str,
+    NEDSF,
+    BFL,
+    HFL,
+    FCTM,
+    ACC,
+    FCK,
+    GACF
+  );
   let alpha = getRadians(SRSF);
 
-  let v = 0.6 * (1 - FCK / 250)
+  let v = 0.6 * (1 - FCK / 250);
   let v1: number;
   let vrdmax: number;
 
@@ -2462,13 +2761,17 @@ export async function getBasicVRDM(
       break;
 
     case EnumSTA.RCC_CW_2018:
-      v1 = Math.max(0.6 * (1 - FCK / 250), 0.5)
+      v1 = Math.max(0.6 * (1 - FCK / 250), 0.5);
       break;
   }
 
   /* procédure de vérification bielle*/
   let fcd = getFcd(ACC, FCK, GACF);
-  vrdmax = ACW * BFL * z * v1 * fcd * (1 / Math.tan(teta) + 1 / Math.tan(alpha)) / (1 + (1 / Math.tan(teta)) ** 2) * 1000000.0 / KUNIT;
+  vrdmax =
+    (((ACW * BFL * z * v1 * fcd * (1 / Math.tan(teta) + 1 / Math.tan(alpha))) /
+      (1 + (1 / Math.tan(teta)) ** 2)) *
+      1000000.0) /
+    KUNIT;
 
   return vrdmax;
 }
@@ -2485,9 +2788,8 @@ export async function getBasicN1TO(
   STA: EnumSTA,
   N622X06: number,
   ATO: number,
-  FCK: number,
+  FCK: number
 ): Promise<number> {
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.EN1992_2_BS:
@@ -2507,11 +2809,14 @@ export async function getBasicN1TO(
   }
 }
 
-export function isReadonly(propertyCode: PropertyCode, propertyValues: Record<PropertyCode, any>): boolean | undefined {
+export function isReadonly(
+  propertyCode: PropertyCode,
+  propertyValues: Record<PropertyCode, any>
+): boolean | undefined {
   if (propertyCode === PropertyCode.STR_SF) {
     return propertyValues[PropertyCode.STA] === EnumSTA.RCC_CW_2018;
   }
-  return undefined
+  return undefined;
 }
 
 /**
@@ -2530,9 +2835,8 @@ export async function getBasicFdtt0(
   RH: number,
   TCO: number,
   TSC: number,
-  H0C: number,
+  H0C: number
 ): Promise<number> {
-
   switch (STA) {
     case EnumSTA.EN1992_1_1_BS:
     case EnumSTA.NF_EN_1992_1_1_NA:
@@ -2544,21 +2848,29 @@ export async function getBasicFdtt0(
 
     case EnumSTA.EN1992_2_BS:
     case EnumSTA.NF_EN_1992_2_NA:
-    case EnumSTA.RCC_CW_2018:
-      {
-        //=IF(F25=J17;1000*(T32-S86)/1000;3200*(T32-S86)/1000)        
-        /*
+    case EnumSTA.RCC_CW_2018: {
+      //=IF(F25=J17;1000*(T32-S86)/1000;3200*(T32-S86)/1000)
+      /*
         F25=J17 - SFC
         T32     - eps._cd,t(STA.2)
         S86     - esp._cd,t0
         */
-        let ecdt = await getBasicECDT(EnumSTA.EN1992_2_BS, TYC, TCO, TSC, H0C, RH, FCM, FCK, SFC);
-        let ecdt0 = getEcdt0(FCK, RH, T0C, TSC, H0C, SFC);
-        return (SFC ? 1000 : 3200) * (ecdt - ecdt0) / 1000;
-      }
+      let ecdt = await getBasicECDT(
+        EnumSTA.EN1992_2_BS,
+        TYC,
+        TCO,
+        TSC,
+        H0C,
+        RH,
+        FCM,
+        FCK,
+        SFC
+      );
+      let ecdt0 = getEcdt0(FCK, RH, T0C, TSC, H0C, SFC);
+      return ((SFC ? 1000 : 3200) * (ecdt - ecdt0)) / 1000;
+    }
   }
 }
-
 
 export function getEcdt0(
   FCK: number,
@@ -2566,7 +2878,7 @@ export function getEcdt0(
   T0C: number,
   TSC: number,
   H0C: number,
-  SFC: boolean,
+  SFC: boolean
 ): number {
   //=T36*(72*EXP(-0.046*K22)+75-F19)*(F22-F21)*0.000001/((F22-F21)+T37*F31^2)*1000
   /*
@@ -2578,8 +2890,12 @@ F21 - TSC
 T37 - bcd
 F31 - H0C
    */
-  let bcd = getBcd(SFC)
-  let Kfck = getKfck(FCK)
+  let bcd = getBcd(SFC);
+  let Kfck = getKfck(FCK);
 
-  return Kfck * (72 * Math.exp(-0.046 * FCK) + 75 - RH) * (T0C - TSC) * 0.000001 / ((T0C - TSC) + bcd * H0C ** 2) * 1000
+  return (
+    ((Kfck * (72 * Math.exp(-0.046 * FCK) + 75 - RH) * (T0C - TSC) * 0.000001) /
+      (T0C - TSC + bcd * H0C ** 2)) *
+    1000
+  );
 }

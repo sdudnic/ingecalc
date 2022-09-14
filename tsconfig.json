@@ -12,13 +12,22 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ]
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2018", "dom"],
+    "paths": {
+      "@root/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@admin/*": ["src/app/admin/*"],
+      "@calculator/*": ["src/app/calculator/*"],
+      "@engine/*": ["src/app/calculator/*"],
+      "@core/*": ["src/app/core/*"],
+      "@home/*": ["src/app/home/*"],
+      "@models/*": ["src/app/models/*"],
+      "@project/*": ["src/app/project/*"],
+      "@property/*": ["src/app/property/*"],
+      "@services/*": ["src/app/services/*"],
+      "@shared/*": ["src/app/shared/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableIvy": true,

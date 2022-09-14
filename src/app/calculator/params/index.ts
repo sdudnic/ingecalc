@@ -1,4 +1,4 @@
-export { default as ABCO } from './abco';
+export * from './abco';
 export { default as ACC } from './acc';
 export { default as ACCB } from './accb';
 export { default as ACT } from './act';
