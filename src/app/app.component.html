@@ -1,16 +1,13 @@
 <h2>Ingé Calc</h2>
 <form [formGroup]="paramsFormGroup">
-  <label>a</label><input type="number" formControlName="a" /> <label>b</label
-  ><input type="number" formControlName="b" />
+<label>{{ PropertyCode.A }}</label
+  ><input type="number" formControlName="{{ PropertyCode.A }}" />
+  <label>{{ PropertyCode.B }}</label
+  ><input type="number" formControlName="{{ PropertyCode.B }}" />
 
-  <label>e</label><input type="number" formControlName="e" /><small>
+  <label>{{ PropertyCode.C }}</label
+  ><input type="number" formControlName="{{ PropertyCode.C }}" /><small>
     => a * b</small
-  >
-  <label>c</label><input type="number" formControlName="c" /><small>
-    => a + 10b</small
-  >
-  <label>d</label><input type="number" formControlName="d" /><small>
-    => a + 100b</small
   >
   <hr />
   <label>ECEFF</label><input type="number" formControlName="ECEFF" />

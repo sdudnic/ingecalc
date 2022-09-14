@@ -1,3 +1,3 @@
-export function C(a: number, b: number): number {
-  return a + 10 * b;
+export async function C(a: number, b: number): Promise<number> {
+  return a * b;
 }

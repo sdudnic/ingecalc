@@ -171,6 +171,11 @@ export enum ErrorLevel {
 }
 
 export enum PropertyCode {
+  A = 'A',
+  B = 'B',
+  C = 'C',
+  D = 'D',
+  E = 'E',
   ABCO = 'ABCO',
   ACC = 'ACC',
   ACCB = 'ACCB',

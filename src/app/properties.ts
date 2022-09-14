@@ -1,9 +1,39 @@
+import { PropertyCode } from './calculator/common/enums';
+
 export class Properties {
-  a = 3;
-  b = 2;
-  c = 0;
-  d = 0;
-  e = 0;
+  static readonly CalculatedKeys = [
+    PropertyCode.AEC,
+    PropertyCode.C,
+    PropertyCode.D,
+    PropertyCode.E,
+  ];
+
+  static readonly DependentProperties = {
+    [PropertyCode.AEC]: [PropertyCode.ECEFF],
+    [PropertyCode.C]: [PropertyCode.A, PropertyCode.B],
+    [PropertyCode.D]: [PropertyCode.A, PropertyCode.B],
+    [PropertyCode.E]: [PropertyCode.A, PropertyCode.B],
+  };
+
+  static getDependentProperties(
+    property: PropertyCode,
+    properties: Record<PropertyCode, any>
+  ): any[] | undefined {
+    if (property in properties) {
+      let values = [];
+      let codes = Properties.DependentProperties[property];
+      codes.forEach((code) => values.push(properties[code]));
+      return values;
+    } else {
+      return undefined;
+    }
+  }
+
+  A = 3;
+  B = 2;
+  C = 0;
+  D = 0;
+  E = 0;
   ABCO = '0.091930';
   ACC = '1';
   ACCB = '1';

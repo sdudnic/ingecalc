@@ -13,10 +13,13 @@ import { Properties } from './properties';
 export class AppComponent {
   subscription: Subscription = new Subscription();
   debounceTime = 500;
-
-  paramsFormGroup: FormGroup;
-  //properties: Properties;
+  paramsFormGroup: FormGroup;  
   properties: Record<PropertyCode, any>;
+
+  // hack to be able to use the enumeration in the HTML
+  public get PropertyCode() {
+    return PropertyCode;
+  }  
 
   constructor(private fb: FormBuilder, private calculator: CalculatorService) {
     //this.properties = new Properties();
