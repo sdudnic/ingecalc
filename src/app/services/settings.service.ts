@@ -24,8 +24,10 @@ export class SettingsService {
    */
   public async getSettings(fromHttp = false): Promise<Setting[]> {
     if (fromHttp || !this.settings || this.settings.length == 0)
-      this.settings = await lastValueFrom(
-        this.http.get<Setting[]>(this.baseUrl + 'values')
+    /**********/
+      //this.settings = new Setting[];/**********/
+      /*await lastValueFrom(
+        this.http.get<Setting[]>(this.baseUrl + 'values')*/
       );
     return this.settings;
   }
@@ -33,27 +35,34 @@ export class SettingsService {
     fromHttp = false
   ): Promise<SettingsDictionary[]> {
     if (fromHttp || !this.settings || this.settings.length == 0)
-      this.propSettings = await lastValueFrom(
-        this.http.get<SettingsDictionary[]>(this.baseUrl + 'propertySettings')
+      //this.propSettings = await lastValueFrom(
+        /**********/
+//        this.http.get<SettingsDictionary[]>(this.baseUrl + 'propertySettings')
       );
     return this.propSettings;
   }
   public getLists(): Observable<{ [key: string]: string[] }> {
-    return this.http.get<{ [key: string]: string[] }>(this.baseUrl + 'lists');
+    /**********/
+    return new { [key: string]: string[] };
+    //return this.http.get<{ [key: string]: string[] }>(this.baseUrl + 'lists');
   }
 
   public getList(code: string): Observable<string[]> {
-    return this.http
-      .get<ListItem[]>(`${this.baseUrl}list/${code}`)
-      .pipe(map((l) => l.map((li) => li.value)));
+    return new string[];
+    /**********/
+    //return this.http
+//      .get<ListItem[]>(`${this.baseUrl}list/${code}`)
+      //.pipe(map((l) => l.map((li) => li.value)));
   }
 
   public getSettingValue(
     settingCode: string,
     propertyCode: string
   ): Observable<string> {
-    return this.http.get<string>(
-      `${this.baseUrl}prop/${settingCode}/${propertyCode}`
+    return "";
+    /**********/
+    //return this.http.get<string>(
+      //`${this.baseUrl}prop/${settingCode}/${propertyCode}`
     );
   }
 /*
